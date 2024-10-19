@@ -2,7 +2,7 @@
 
 ## Motivation
 
-I've used `asyncio` a couple times in work-related projects. It came up again recently for a web-socket related effort I'm exploring. I felt I had a somewhat fragmented and ultimately fairly weak mental-model of how `asyncio` actually works. The official `asyncio` docs provide pretty decent documentation for each specific function, but, in my opinion, lack a cohesive overview of the package's design and functionality to help the user make informed decisions about which tool in the `asyncio` tool-kit they ought to grab, or to recognize when `asyncio` is the entirely wrong tool-kit. This is my attempt to fill that gap. 
+I've used `asyncio` a couple times now, but never really felt confident in my mental-model of how it works and how I can best use it. The official `asyncio` docs provide decent-enough documentation for each specific function in the package, but, in my opinion, lack a cohesive overview of the design and functionality to help the user make informed decisions about which tool in the `asyncio` tool-kit they ought to grab, or to recognize when `asyncio` is the entirely wrong tool-kit. This is my attempt to fill that gap. 
 
 There were a few blog-posts, stack-overflow discussons and other writings about `asyncio` that I found helpful, but didn't fully provide what I was looking for. I've linked the ones I enjoyed and/or found useful below.
 
@@ -10,7 +10,7 @@ A few aspects particually drove my curiosity (read: drove me nuts). I wanted to 
 
 ## Introduction
 
-The details of how asyncio works under the hood are pretty hairy, so I offer two conceputal overviews. The first section titled Overview is meant to provide a sturdy mental model without getting into too many specifics of asyncio. The second titled "More of the nuts & bolts" gets into the nitty-gritty. If nitty-gritty is your jam or you're looking to more deeply understand what's going on, I recommend starting with the first section and then proceeding through the second section. I've tried to ensure they don't repeat each other, i.e. they're complementary.
+The details of how asyncio works under the hood are fairly hairy and involved, so I offer two conceputal overviews. The first section titled Overview is meant to provide a sturdy mental model without getting into too many specifics of asyncio. The second titled "More of the nuts & bolts" gets into the nitty-gritty. If nitty-gritty is your jam, you're looking to more deeply understand what's going on or want to build your own operators on top of asyncio, I recommend starting with the first section and then proceeding through the second section. I've tried to ensure they don't repeat each other and instead build on each other.
 
 ## Overview
 
@@ -23,7 +23,7 @@ In more technical terms, the event-loop contains a queue of Tasks to be run. Som
 ```python
 import asyncio
 
-# This creates an event-loop.
+# This creates an event-loop and indefinitely cycles through its' queue of tasks.
 event_loop = asyncio.new_event_loop()
 event_loop.run_forever()
 ```
@@ -105,38 +105,41 @@ I imagine you might have a few questions. I'll address these three. If you read 
 
 #### coroutine.send(), await & yield
 
-`coroutine.send(arg)` is the method used to start and/or resume a coroutine. 
+`coroutine.send(arg)` is the method used to start or resume a coroutine. 
 
-If the coroutine was paused and is now being resumed, the argument arg will be provided as the return-value of the `yield` statement which originally paused it. When starting a coroutine, or when there's no value you want to send in, you use `coroutine.send(None)`. The small snippet below illustrates both ways of using `coroutine.send(arg)`.
+If the coroutine was paused and is now being resumed, the argument `arg` will be sent in as the return-value of the `yield` statement which originally paused it. When starting a coroutine, or when there's no value you want to send in, you can use `coroutine.send(None)`. The code snippet below illustrates both ways of using `coroutine.send(arg)`.
+
+`yield` pauses execution and returns control to the caller. In the example below, the caller is `await custom_awaitable` on line 13. Generally, `await` calls the `__await__` method of the given object and then percolates any yields it receives up the call-chain, in this case, that's back to `coroutine.send(None)` on line 21.
+
+Then, we resume the coroutine with `coroutine.send(42)` on line 26. The coroutine picks back up from where it yielded on line 3. 
 
 ```python
-
-class CustomAwaitable:
-    def __await__(self):
-        value_sent_in = yield 7
-        print(f"Awaitable resumed with value: {value_sent_in}.")
-        return value_sent_in
-
-async def simple_func():
-    
-    print("Beginning coroutine simple_func().")
-    custom_awaitable = CustomAwaitable()
-    print("Awaiting custom_awaitable")
-    
-    value_from_awaitable = await custom_awaitable
-    print(f"Coroutine received value: {value_from_awaitable} from awaitable.")
-
-# Create the coroutine.
-coroutine = simple_func()
-
-# Begin the coroutine. Store any results yielded or returned by the coroutine into
-# variable: coroutine_intermediate_result.
-coroutine_intermediate_result = coroutine.send(None)
-print(f"Coroutine paused and returned intermediate value: {coroutine_intermediate_result}")
-
-# Resume the coroutine and pass in the number 42 when doing so. 
-print(f"Resuming coroutine and sending in value: 42.")
-coroutine.send(42)
+1  class CustomAwaitable:
+2      def __await__(self):
+3          value_sent_in = yield 7
+4          print(f"Awaitable resumed with value: {value_sent_in}.")
+5          return value_sent_in
+6 
+7  async def simple_func():
+8      print("Beginning coroutine simple_func().")
+9      
+10     custom_awaitable = CustomAwaitable()
+11     print("Awaiting custom_awaitable")
+12    
+13     value_from_awaitable = await custom_awaitable
+14     print(f"Coroutine received value: {value_from_awaitable} from awaitable.")
+15  
+16  # Create the coroutine.
+17  coroutine = simple_func()
+18  
+19  # Begin the coroutine. Store any results yielded or returned by the coroutine into
+20  # variable: coroutine_intermediate_result.
+21  coroutine_intermediate_result = coroutine.send(None)
+22  print(f"Coroutine paused and returned intermediate value: {coroutine_intermediate_result}")
+23  
+24  # Resume the coroutine and pass in the number 42 when doing so. 
+25  print(f"Resuming coroutine and sending in value: 42.")
+26  coroutine.send(42)
 ```
 
 #### Futures
