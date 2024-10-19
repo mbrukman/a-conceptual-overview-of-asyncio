@@ -18,7 +18,7 @@ The details of how asyncio works under the hood are pretty hairy, so I offer two
 
 Everything in asyncio happens relative to the event-loop. It's the star of the show. It's also kind of like an orchestra conductor or military general. She's behind the scenes managing resources. Some power is explicitly granted to her, but a lot of her ability to get things done comes from the respect & cooperation of her subordinates.
 
-In more technical terms, the event-loop contains a queue of Tasks it should run. Some Tasks are added directly by you, and some indirectly by asyncio. The event-loop invokes a Task by giving it control, similar to a context-switch or calling a function. That Task then runs. Once it pauses or completes, it returns control to the event-loop. The event-loop then invokes the next Task in the queue. This process repeats indefinitely. 
+In more technical terms, the event-loop contains a queue of Tasks to be run. Some Tasks are added directly by you, and some indirectly by asyncio. The event-loop invokes a Task by giving it control, similar to a context-switch or calling a function. That Task then runs. Once it pauses or completes, it returns control to the event-loop. The event-loop then invokes the next Task in the queue. This process repeats indefinitely. 
 
 ```python
 import asyncio
@@ -39,6 +39,13 @@ def simple_func(x: int):
     )
 ```
 
+Calling a regular function invokes its' logic or body. 
+```python
+>>> simple_func(x=5)
+I am simple_func. I live a simple life. Someone knocked on my door this morning to give me x: 5.
+>>> 
+```
+
 And this is an asynchronous-function or coroutine-function.
 ```python
 async def super_special_func(x: int):
@@ -46,13 +53,6 @@ async def super_special_func(x: int):
         f"I am super_special_func. I am way cooler than simple_func. "
         f"Someone knocked on my door this morning to give me x: {x}."
     )
-```
-
-Calling a regular function invokes its' logic or body. 
-```python
->>> simple_func(x=5)
-I am simple_func. I live a simple life. Someone knocked on my door this morning to give me x: 5.
->>> 
 ```
 
 Calling an asynchronous function creates and returns a coroutine object.
@@ -64,11 +64,11 @@ Calling an asynchronous function creates and returns a coroutine object.
 
 The terms "asynchronous function" (or "coroutine function") and "coroutine object" are often conflated as coroutine. I find that a tad confusing. In this article, coroutine will exclusively mean "coroutine object". 
 
-That coroutine sort-of represents the function's body or logic. A coroutine has to be explicitly started; merely creating the coroutine does not start it. Notably, it can be paused & resumed. That pasuing & resuming ability is what makes it asynchronous and special!
+That coroutine represents the function's body or logic. A coroutine has to be explicitly started; merely creating the coroutine does not start it. Notably, it can be paused & resumed. That pasuing & resuming ability is what makes it asynchronous and special!
 
 #### Tasks
 
-Tasks are coroutines tied to an event-loop. That's a simplified definition that we'll flesh out later.
+Tasks are coroutines tied to an event-loop. That's a simplified definition that's sufficient for the time being. We will flesh it out in the next section.
 
 ```python
 # This creates a Task object. Instantiating or creating a Task automatically 
@@ -91,7 +91,7 @@ get_user_info = asyncio.Task(coro=get_user_info(), loop=event_loop)
 event_loop.run_forever()
 ```
 
-The underlying hardware responsible for performing the network request, parsing the response bytes and putting them into main-memory can run seperately from the CPU. Of course, that's all for nothing if we don't give the CPU something to do in the meantime.
+The underlying hardware responsible for performing the network request and placing the response-bytes them into main-memory can run seperately from the CPU. Of course, that's all for nothing if we don't give the CPU something to do in the meantime.
 
 In this case, we want to cede control back to the event-loop from the `get_user_info` coroutine just after calling `db.get(user_id)`. Then, return to the coroutine once that db-request has finished. 
 
@@ -99,8 +99,82 @@ To accomplish that we'll first cede control from our coroutine to the event-loop
 
 Each time the event-loop iterates over its' queue of tasks, the watcher-task will be run and check how the db-request is getting along. After say 6 cycles through the event-loop, the watcher-task finally sees that the db-request has completed. So, it grabs the result of that request, and adds another Task to the queue to resume the `get_user_info` coroutine with the db-request result. 
 
-
 ## More of the nuts & bolts
+
+I imagine you might have a few questions. I'll address these three. If you read these answers and still find your question unanswered, please open a PR or Issue on this repository!
+
+#### coroutine.send(), await & yield
+
+`coroutine.send(arg)` is the method used to start and/or resume a coroutine. 
+
+If the coroutine was paused and is now being resumed, the argument arg will be provided as the return-value of the await which originally paused it. When starting a coroutine you use `coroutine.send(None)`. The small snippet below illustrates both ways of using `coroutine.send(arg)`.
+
+```python
+
+class CustomAwaitable:
+    def __await__(self):
+        val = yield 7
+        print(f"Awaitable resumed with value: {val}.")
+        return val
+
+async def simple_func():
+    print("Beginning coroutine simple_func().")
+    custom_awaitable = CustomAwaitable()
+    print("Awaiting custom_awaitable")
+    val = await custom_awaitable
+    print(f"Coroutine received value: {val} from awaitable.")
+
+coroutine = simple_func()
+
+val = coroutine.send(None)
+print(f"Coroutine paused and returned intermediate value: {val}")
+
+print(f"Resuming coroutine and sending in value: 42.")
+coroutine.send(42)
+
+#### Futures
+
+A future is an object meant to represent a computation or process's status and it's result (if any), hence the term future i.e. still to come or not yet happened. 
+
+A future has a few important attributes. One is its' state which can be either 'pending', 'cancelled' or 'done'. Another is its' result which is set when the state transitions to 'done' and can be any Python object. To be clear, a Future does not represent the actual computation to be done, like a coroutine does, instead it represents the status of that computation, kind of like a status-light (red, yellow or green) or indicator. 
+
+```python
+class Future:
+    def __init__(self):
+        self.state = 'pending'
+        self.result = None
+    
+    def mark_done(self, result):
+        self.state = 'done'
+        self.result = result
+```
+
+Futures also have an important method: `__await__`. Here is a minimally modified snippet of the implementation found in `asyncio.futures.Future`.
+
+```python
+class Future:
+    ...
+    def __await__(self):
+        if not self.done():
+            yield self
+        if not self.done():
+            raise RuntimeError("await wasn't used with future")
+        return self.result()
+```
+
+It's okay and expected for that code to not make much sense to you right now. We'll go through it in detail shortly.
+
+Task is a subclass of Future meaning it inherits its' attributes & methods. And note, Task does not override Future's `__await__` method.
+
+`await` is a Python keyword introduced in Python3.5 and it can be used on any object that has an `__await__` method, including coroutines.
+
+#### What does await do?
+
+#### How do I cede control from my coroutine to the event-loop? 
+
+#### How does the event-loop know where to resume my coroutine from?
+
+#### How does the event-loop know when the thing I'm waiting for is done (and whether it needs cpu-time to get there)?
 
 
 Tasks
@@ -123,30 +197,11 @@ Things to Remember
 
 ### Futures (asyncio.futures.Future)
 
-A future is an object meant to represent a computation or process's status and it's result (if any), hence the term future i.e. still to come or not yet happened. 
 
-A future has a few important attributes. One is its' state which can be either 'pending', 'cancelled' or 'done'. Another is its' result which is set when the state transitions to 'done' and can be any Python object. To be clear, a Future does not represent the actual computation to be done, like a coroutine does, instead it represents the status of that computation, kind of like a status-light (red, yellow or green) or indicator. 
 
 Here's a bit of a contrived example. The computation in this case is computing a factorial. The future object can let us know when the computation is done and what the result of the computation was. Of course, this isn't a very practical use-case, but perhaps you can imagine how such a Future object could be useful when it comes to file or network I/O. Reading a huge file from disk into memory may take a while and not need cpu resources, which we could devote to running another part of our program rather than merely idling. 
 
-```
-class Future:
-    def __init__(self):
-        self.state = 'pending'
-        self.result = None
-    
-    def mark_done(self, result):
-        self.state = 'done'
-        self.result = result
 
-def factorial(n: int, future: Future):
-    
-    multiplicative_total = 1
-    for val in range(1, n):
-        multiplicative_total *= val
-    
-    future.mark_done(multiplicative_total)
-```
 
 ### Tasks (asyncio.tasks.Task)
 
