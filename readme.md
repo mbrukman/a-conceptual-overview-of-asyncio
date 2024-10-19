@@ -2,11 +2,29 @@
 
 ### Motivation
 
-I've used `asyncio` a couple times in work-related projects. It came up again recently for a web-socket related effort I'm exploring. I felt I had a somewhat fragmented and ultimately fairly weak mental-model of how `asyncio` actually works. The official `asyncio` docs provide pretty good documentation for each specific function available, but, in my opinion, lack a cohesive overview of the package's design and functionality to help the user make informed decisions about which tool in the `asyncio` tool-kit they ought to grab. This is my attempt to fill that gap.
+I've used `asyncio` a couple times in work-related projects. It came up again recently for a web-socket related effort I'm exploring. I felt I had a somewhat fragmented and ultimately fairly weak mental-model of how `asyncio` actually works. The official `asyncio` docs provide pretty good documentation for each specific function, but, in my opinion, lack a cohesive overview of the package's design and functionality to help the user make informed decisions about which tool in the `asyncio` tool-kit they ought to grab, or to recognize when `asyncio` is the entirely wrong tool-kit. This is my attempt to fill that gap. 
 
-There were a few blog-posts, stack-overflow discussons and other writings about `asyncio` that I found helpful, but didn't fully provide what I was after. For those curious, I've linked the ones I enjoyed and/or found useful below.
+There were a few blog-posts, stack-overflow discussons and other writings about `asyncio` that I found helpful, but didn't fully provide what I was looking for. I've linked the ones I enjoyed and/or found useful below.
 
-A few aspects particually drove my curiosity (read: drove me nuts). I wanted to know what's roughly happening behind the scenes when various objects are awaited. And, how does `asyncio` differentiate between a task which doesn't need cpu-time to make progress towards completion (for example a network-request or file-read) as opposed to a task that does need cpu-time to make progress (for example computing the $n^{th}$ fibonacci number). In other words, how does `asyncio.sleep()` run efficiently while `time.sleep()` does not? 
+A few aspects particually drove my curiosity (read: drove me nuts). I wanted to know what's roughly happening behind the scenes when various objects are awaited. And, how does `asyncio` differentiate between a task which doesn't need cpu-time to make progress towards completion (for example a network-request or file-read) as opposed to a task that does need cpu-time to make progress (for example computing the $n^{th}$ fibonacci number). In other words, how does `asyncio.sleep()` run asynchronously while `time.sleep()` does not? 
+
+### Introduction
+
+The details of how asyncio works under the hood are pretty hairy, so I offer two conceputal overviews. The first section titled Overview is meant to provide a sturdy mental model without getting into too many specifics of asyncio. The second titled "More of the nuts & bolts" gets into the nitty-gritty. If nitty-gritty is your jam or you're looking to more deeply understand what's going on, I recommend starting with the first section and then proceeding through the second section. I've tried to ensure they don't repeat each other, i.e. they're complementary.
+
+### Overview
+
+Event Loop
+Tasks
+Async Functions & Coroutines
+Resuming a Task
+Pausing a Task
+Glossary
+Things to Remember
+
+### More of the nuts & bolts
+
+
 
 ### Asynchronous Functions (async)
 
@@ -142,4 +160,18 @@ via Future.add_done_callback().
 
 ### loop.scheduled
 
+
+### Links 
+
+A good overview of the fundamental Python language features asyncio uses. 
+https://stackoverflow.com/questions/49005651/how-does-asyncio-actually-work
+
+Great context and basic-intro to asyncio. In my experience, Real Python is generally excellent quality.
+https://realpython.com/async-io-python/
+
+I only skimmed this, but I found the example program at the end very useful to pull apart.
+https://snarky.ca/how-the-heck-does-async-await-work-in-python-3-5/
+
+A good answer to a specific question about why coroutine generators exist.
+https://stackoverflow.com/questions/46203876/what-are-the-differences-between-the-purposes-of-generator-functions-and-asynchr
 
