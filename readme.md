@@ -107,7 +107,7 @@ I imagine you might have a few questions. I'll address these three. If you read 
 
 `coroutine.send(arg)` is the method used to start and/or resume a coroutine. 
 
-If the coroutine was paused and is now being resumed, the argument arg will be provided as the return-value of the await which originally paused it. When starting a coroutine you use `coroutine.send(None)`. The small snippet below illustrates both ways of using `coroutine.send(arg)`.
+If the coroutine was paused and is now being resumed, the argument arg will be provided as the return-value of the `yield` statement which originally paused it. When starting a coroutine, or when there's no value you want to send in, you use `coroutine.send(None)`. The small snippet below illustrates both ways of using `coroutine.send(arg)`.
 
 ```python
 
@@ -118,11 +118,13 @@ class CustomAwaitable:
         return value_sent_in
 
 async def simple_func():
+    
     print("Beginning coroutine simple_func().")
     custom_awaitable = CustomAwaitable()
     print("Awaiting custom_awaitable")
-    val = await custom_awaitable
-    print(f"Coroutine received value: {val} from awaitable.")
+    
+    value_from_awaitable = await custom_awaitable
+    print(f"Coroutine received value: {value_from_awaitable} from awaitable.")
 
 # Create the coroutine.
 coroutine = simple_func()
