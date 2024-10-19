@@ -2,7 +2,7 @@
 
 ### Motivation
 
-I've used `asyncio` a couple times in work-related projects. It came up again recently for a web-socket related effort I'm exploring. I felt I had a somewhat fragmented and ultimately fairly weak mental-model of how `asyncio` actually works. The official `asyncio` docs provide pretty good documentation for each specific function, but, in my opinion, lack a cohesive overview of the package's design and functionality to help the user make informed decisions about which tool in the `asyncio` tool-kit they ought to grab, or to recognize when `asyncio` is the entirely wrong tool-kit. This is my attempt to fill that gap. 
+I've used `asyncio` a couple times in work-related projects. It came up again recently for a web-socket related effort I'm exploring. I felt I had a somewhat fragmented and ultimately fairly weak mental-model of how `asyncio` actually works. The official `asyncio` docs provide pretty decent documentation for each specific function, but, in my opinion, lack a cohesive overview of the package's design and functionality to help the user make informed decisions about which tool in the `asyncio` tool-kit they ought to grab, or to recognize when `asyncio` is the entirely wrong tool-kit. This is my attempt to fill that gap. 
 
 There were a few blog-posts, stack-overflow discussons and other writings about `asyncio` that I found helpful, but didn't fully provide what I was looking for. I've linked the ones I enjoyed and/or found useful below.
 
@@ -14,7 +14,63 @@ The details of how asyncio works under the hood are pretty hairy, so I offer two
 
 ### Overview
 
-Event Loop
+#### Event Loop
+
+Everything in asyncio happens relative to the event-loop. It's the star of the show. It's also kind of like an orchestra conductor or military general. She's behind the scenes managing resources. Some power is explicitly granted to her, but a lot of her ability to get things done comes from the respect & cooperation of her subordinates.
+
+In more technical terms, the event-loop contains a queue of Tasks it should run. Some Tasks are added directly by you, and some indirectly by asyncio. The event-loop invokes a Task by giving it control, similar to a context-switch or calling a function. That Task then runs. Once it pauses or completes, it returns control to the event-loop. The event-loop then invokes the next Task in the queue. This process repeats indefinitely. 
+
+```python
+import asyncio
+
+# This creates an event-loop.
+event_loop = asyncio.new_event_loop()
+```
+
+#### Asynchronous Functions & Coroutines
+
+This is a regular 'ol Python function.
+```python
+def simple_func(x: int):
+    print(
+        f"I am simple_func. I live a simple life. Someone knocked "
+        f"on my door this morning to give me x: {x}."
+    )
+```
+
+And this is an asynchronous-function or coroutine-function.
+```python
+async def super_special_func(x: int):
+    print(
+        f"I am super_special_func. I am way cooler than simple_func. "
+        f"Someone knocked on my door this morning to give me x: {x}."
+    )
+```
+
+Calling a regular function invokes its' logic or body. 
+```python
+>>> simple_func(x=5)
+I am simple_func. I live a simple life. Someone knocked on my door this morning to give me x: 5.
+>>> 
+```
+
+Calling an asynchronous function creates and returns a coroutine object.
+```python
+>>> super_special_func(x=5)
+<coroutine object super_special_func at 0x104ed2740>
+>>> 
+```
+
+The terms "asynchronous function" (or "coroutine function") and "coroutine object" are often conflated as coroutine. I find that a tad confusing. In this article, coroutine will exclusively mean "coroutine object". 
+
+That coroutine sort-of represents the function's body or logic. A coroutine has to be explicitly started; merely creating the coroutine does not start it. Notably, it can be paused & resumed. That pasuing & resuming ability is what makes it asynchronous and special!
+
+#### Futures
+
+A future is an object meant to represent a computation or process's status and it's result (if any), hence the term future i.e. still to come or not yet happened. 
+
+A future has a few important attributes. One is its' state which can be either 'pending', 'cancelled' or 'done'. Another is its' result which is set when the state transitions to 'done' and can be any Python object. To be clear, a Future does not represent the actual computation to be done, like a coroutine does, instead it represents the status of that computation, kind of like a status-light (red, yellow or green) or indicator. 
+
 Tasks
 Async Functions & Coroutines
 Resuming a Task
@@ -28,27 +84,14 @@ Things to Remember
 
 ### Asynchronous Functions (async)
 
-This is a regular 'ol Python function.
-```
-def simple_func(x: int):
-    print(f"I am simple_func and I received the input x: {x}.")
 
-```
 
-This is known as an asynchronous-function or coroutine-function. Note: the only difference is the "async" prefix before "def".
-```
-async def simple_func(x: int):
-    print(f"I am simple_func and I received the input x: {x}.")
 
-```
 
-Calling a regular function invokes it's body or logic. Calling a coroutine-function does not invoke the function's logic, instead it creates and returns a coroutine object. This is very similar to the distinction between functions and generators too. It's common to see the terms (and concepts) coroutine-function and coroutine-object lumped together as just coroutine which I find a tad confusing.
-
-That coroutine object sort-of represents the function's body or logic. The coroutine object has to be explicitly started; merely creating the coroutine object does not start it. Notably, it can also be paused & resumed. That pasuing & resuming ability is what makes it asynchronous and special!
 
 ### Futures (asyncio.futures.Future)
 
-A future is an object meant to represent a computation or process's status and it's eventual result, hence the term future i.e. still to come or not yet happened. It has a few important attributes. One is its' state which can be either 'pending', 'cancelled' or 'done'. Another is its' result which is set when the state transitions to 'done' and can be any Python object. To be clear, a Future does not represent the actual computation to be done, like a coroutine does, instead it represents the status of that computation, kind of like a status-light (red, yellow or green) or indicator. 
+
 
 Here's a bit of a contrived example. The computation in this case is computing a factorial. The future object can let us know when the computation is done and what the result of the computation was. Of course, this isn't a very practical use-case, but perhaps you can imagine how such a Future object could be useful when it comes to file or network I/O. Reading a huge file from disk into memory may take a while and not need cpu resources, which we could devote to running another part of our program rather than merely idling. 
 
@@ -86,8 +129,6 @@ class Task(Future):
 
 ### Event Loop (asyncio.base_events.BaseEventLoop)
 
-The event-loop is kind of like an orchestra conductor or military general. She's the lady behind the scenes responsible for managing resources. 
-She has some power explicitly granted to her, but a lot of her ability to get things done comes from the respect & cooperation of her subordinates. 
 
 Most asyncio programs start something like so. And many other ways of invoking asyncio (like asyncio.run or asyncio.run_until_complete) largely 
 re-use the main components of this approach.
