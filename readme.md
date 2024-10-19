@@ -1,6 +1,6 @@
-## A conceptual overview of the ideas and objects which power Python's `asyncio`
+# A conceptual overview of the ideas and objects which power Python's `asyncio`
 
-### Motivation
+## Motivation
 
 I've used `asyncio` a couple times in work-related projects. It came up again recently for a web-socket related effort I'm exploring. I felt I had a somewhat fragmented and ultimately fairly weak mental-model of how `asyncio` actually works. The official `asyncio` docs provide pretty decent documentation for each specific function, but, in my opinion, lack a cohesive overview of the package's design and functionality to help the user make informed decisions about which tool in the `asyncio` tool-kit they ought to grab, or to recognize when `asyncio` is the entirely wrong tool-kit. This is my attempt to fill that gap. 
 
@@ -8,11 +8,11 @@ There were a few blog-posts, stack-overflow discussons and other writings about 
 
 A few aspects particually drove my curiosity (read: drove me nuts). I wanted to know what's roughly happening behind the scenes when various objects are awaited. And, how does `asyncio` differentiate between a task which doesn't need cpu-time to make progress towards completion (for example a network-request or file-read) as opposed to a task that does need cpu-time to make progress (for example computing the $n^{th}$ fibonacci number). In other words, how does `asyncio.sleep()` run asynchronously while `time.sleep()` does not? 
 
-### Introduction
+## Introduction
 
 The details of how asyncio works under the hood are pretty hairy, so I offer two conceputal overviews. The first section titled Overview is meant to provide a sturdy mental model without getting into too many specifics of asyncio. The second titled "More of the nuts & bolts" gets into the nitty-gritty. If nitty-gritty is your jam or you're looking to more deeply understand what's going on, I recommend starting with the first section and then proceeding through the second section. I've tried to ensure they don't repeat each other, i.e. they're complementary.
 
-### Overview
+## Overview
 
 #### Event Loop
 
@@ -75,19 +75,30 @@ Tasks are coroutines tied to an event-loop. That's a simplified definition that 
 super_special_task = asyncio.Task(coro=super_special_func(x=5), loop=event_loop)
 ```
 
-#### File I/O Example
+#### Network I/O Example
+
+Performing a database request across a network might take half a second or so, but that's ages in computer-time. Your processor could have done millions or even billions of things in that time. The same is true for say downloading a movie, requesting a website, loading a file from disk into memory, etc. The general theme is those are all input/output (I/O) actions.
 
 ```python
-async def download_movie():
-    # Download the 1995 hit movie Heat.
-    movie = requests.get("https://free_totally_legal_movies.com/Heat")
-    return movie
+async def get_user_info(user_id: uuid.UUID):
+    # Obtain the user's information from the database.
+    user_info = db.get(user_id)
+    return user_info
 
 event_loop = asyncio.new_event_loop()
-download_movie_task = asyncio.Task(coro=download_movie(), loop=event_loop)
+get_user_info = asyncio.Task(coro=get_user_info(), loop=event_loop)
 ```
 
-Downloading a movie takes a while. The CPU is largely just idling while waiting for the part of the OS responsible for networking to obtain all those bytes from the world wide web. We'd like to have the CPU do other things and come back to this process once the movie's been downloaded.
+The underlying hardware responsible for performing the network request, parsing the response bytes and putting them into main-memory can run seperately from the CPU. Of course, that's all for nothing if we don't give the CPU something to do in the meantime.
+
+In this case, we want to cede control back to the event-loop from the get_user_info coroutine just after calling db.get. Then, return to the coroutine once that database request has finished. 
+
+To accomplish that we'll first cede control from our coroutine to the event-loop. The event-loop creates a new Task, we'll refer to it a watcher-task (though that's not official lingo by any means), with some important responsibilities. That watcher-task will keep an eye on the db-request to see if it's done. And it'll keep note of how to re-invoke the get_user_info() coroutine which has been paused. 
+
+Each time the event-loop iterates over its' queue of tasks, the watcher-task will be run and check how the db-request is getting along. After say 4 cycles through the event-loop, the watcher-task finally sees the db-request has completed. So, it grabs the result, and adds another Task to the queue to re-invoke the get_user_info() coroutine with the db-request result. 
+
+
+## More of the nuts & bolts
 
 
 Tasks
@@ -97,7 +108,7 @@ Pausing a Task
 Glossary
 Things to Remember
 
-### More of the nuts & bolts
+
 
 
 
