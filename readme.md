@@ -25,6 +25,7 @@ import asyncio
 
 # This creates an event-loop.
 event_loop = asyncio.new_event_loop()
+event_loop.run_forever()
 ```
 
 #### Asynchronous Functions & Coroutines
@@ -87,6 +88,7 @@ async def get_user_info(user_id: uuid.UUID):
 
 event_loop = asyncio.new_event_loop()
 get_user_info = asyncio.Task(coro=get_user_info(), loop=event_loop)
+event_loop.run_forever()
 ```
 
 The underlying hardware responsible for performing the network request, parsing the response bytes and putting them into main-memory can run seperately from the CPU. Of course, that's all for nothing if we don't give the CPU something to do in the meantime.
