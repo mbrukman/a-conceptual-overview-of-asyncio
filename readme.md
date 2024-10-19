@@ -65,11 +65,30 @@ The terms "asynchronous function" (or "coroutine function") and "coroutine objec
 
 That coroutine sort-of represents the function's body or logic. A coroutine has to be explicitly started; merely creating the coroutine does not start it. Notably, it can be paused & resumed. That pasuing & resuming ability is what makes it asynchronous and special!
 
-#### Futures
+#### Tasks
 
-A future is an object meant to represent a computation or process's status and it's result (if any), hence the term future i.e. still to come or not yet happened. 
+Tasks are coroutines tied to an event-loop. That's a simplified definition that we'll flesh out later.
 
-A future has a few important attributes. One is its' state which can be either 'pending', 'cancelled' or 'done'. Another is its' result which is set when the state transitions to 'done' and can be any Python object. To be clear, a Future does not represent the actual computation to be done, like a coroutine does, instead it represents the status of that computation, kind of like a status-light (red, yellow or green) or indicator. 
+```python
+# This creates a Task object. Instantiating or creating a Task automatically 
+# adds it to the event-loop's queue.
+super_special_task = asyncio.Task(coro=super_special_func(x=5), loop=event_loop)
+```
+
+#### File I/O Example
+
+```python
+async def download_movie():
+    # Download the 1995 hit movie Heat.
+    movie = requests.get("https://free_totally_legal_movies.com/Heat")
+    return movie
+
+event_loop = asyncio.new_event_loop()
+download_movie_task = asyncio.Task(coro=download_movie(), loop=event_loop)
+```
+
+Downloading a movie takes a while. The CPU is largely just idling while waiting for the part of the OS responsible for networking to obtain all those bytes from the world wide web. We'd like to have the CPU do other things and come back to this process once the movie's been downloaded.
+
 
 Tasks
 Async Functions & Coroutines
@@ -91,7 +110,9 @@ Things to Remember
 
 ### Futures (asyncio.futures.Future)
 
+A future is an object meant to represent a computation or process's status and it's result (if any), hence the term future i.e. still to come or not yet happened. 
 
+A future has a few important attributes. One is its' state which can be either 'pending', 'cancelled' or 'done'. Another is its' result which is set when the state transitions to 'done' and can be any Python object. To be clear, a Future does not represent the actual computation to be done, like a coroutine does, instead it represents the status of that computation, kind of like a status-light (red, yellow or green) or indicator. 
 
 Here's a bit of a contrived example. The computation in this case is computing a factorial. The future object can let us know when the computation is done and what the result of the computation was. Of course, this isn't a very practical use-case, but perhaps you can imagine how such a Future object could be useful when it comes to file or network I/O. Reading a huge file from disk into memory may take a while and not need cpu resources, which we could devote to running another part of our program rather than merely idling. 
 
