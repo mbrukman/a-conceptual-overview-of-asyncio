@@ -81,7 +81,7 @@ Performing a database request across a network might take half a second or so, b
 
 ```python
 async def get_user_info(user_id: uuid.UUID):
-    # Obtain the user's information from the database.
+    # Request the user's information from the database.
     user_info = db.get(user_id)
     return user_info
 
@@ -91,11 +91,11 @@ get_user_info = asyncio.Task(coro=get_user_info(), loop=event_loop)
 
 The underlying hardware responsible for performing the network request, parsing the response bytes and putting them into main-memory can run seperately from the CPU. Of course, that's all for nothing if we don't give the CPU something to do in the meantime.
 
-In this case, we want to cede control back to the event-loop from the get_user_info coroutine just after calling db.get. Then, return to the coroutine once that database request has finished. 
+In this case, we want to cede control back to the event-loop from the `get_user_info` coroutine just after calling `db.get(user_id)`. Then, return to the coroutine once that db-request has finished. 
 
-To accomplish that we'll first cede control from our coroutine to the event-loop. The event-loop creates a new Task, we'll refer to it a watcher-task (though that's not official lingo by any means), with some important responsibilities. That watcher-task will keep an eye on the db-request to see if it's done. And it'll keep note of how to re-invoke the get_user_info() coroutine which has been paused. 
+To accomplish that we'll first cede control from our coroutine to the event-loop. The event-loop creates a new Task, we'll refer to it as a watcher-task (though that's not official lingo by any means), with some important responsibilities. That watcher-task will check on the db-request to see if it's done. And it'll keep note of how to resume the `get_user_info` coroutine from where it was paused.
 
-Each time the event-loop iterates over its' queue of tasks, the watcher-task will be run and check how the db-request is getting along. After say 4 cycles through the event-loop, the watcher-task finally sees the db-request has completed. So, it grabs the result, and adds another Task to the queue to re-invoke the get_user_info() coroutine with the db-request result. 
+Each time the event-loop iterates over its' queue of tasks, the watcher-task will be run and check how the db-request is getting along. After say 6 cycles through the event-loop, the watcher-task finally sees that the db-request has completed. So, it grabs the result of that request, and adds another Task to the queue to resume the `get_user_info` coroutine with the db-request result. 
 
 
 ## More of the nuts & bolts
