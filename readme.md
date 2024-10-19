@@ -113,9 +113,9 @@ If the coroutine was paused and is now being resumed, the argument arg will be p
 
 class CustomAwaitable:
     def __await__(self):
-        val = yield 7
-        print(f"Awaitable resumed with value: {val}.")
-        return val
+        value_sent_in = yield 7
+        print(f"Awaitable resumed with value: {value_sent_in}.")
+        return value_sent_in
 
 async def simple_func():
     print("Beginning coroutine simple_func().")
@@ -124,13 +124,18 @@ async def simple_func():
     val = await custom_awaitable
     print(f"Coroutine received value: {val} from awaitable.")
 
+# Create the coroutine.
 coroutine = simple_func()
 
-val = coroutine.send(None)
-print(f"Coroutine paused and returned intermediate value: {val}")
+# Begin the coroutine. Store any results yielded or returned by the coroutine into
+# variable: coroutine_intermediate_result.
+coroutine_intermediate_result = coroutine.send(None)
+print(f"Coroutine paused and returned intermediate value: {coroutine_intermediate_result}")
 
+# Resume the coroutine and pass in the number 42 when doing so. 
 print(f"Resuming coroutine and sending in value: 42.")
 coroutine.send(42)
+```
 
 #### Futures
 
