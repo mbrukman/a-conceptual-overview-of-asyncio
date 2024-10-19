@@ -95,7 +95,7 @@ The underlying hardware responsible for performing the network request, parsing 
 
 In this case, we want to cede control back to the event-loop from the `get_user_info` coroutine just after calling `db.get(user_id)`. Then, return to the coroutine once that db-request has finished. 
 
-To accomplish that we'll first cede control from our coroutine to the event-loop. The event-loop creates a new Task, we'll refer to it as a watcher-task (though that's not official lingo by any means), with some important responsibilities. That watcher-task will check on the db-request to see if it's done. And it'll keep note of how to resume the `get_user_info` coroutine from where it was paused.
+To accomplish that we'll first cede control from our coroutine to the event-loop. The event-loop then creates a new Task, we'll refer to it as a watcher-task (though that's not official lingo by any means), with some important responsibilities. That watcher-task will check on the db-request to see if it's done. And it'll keep note of how to resume the `get_user_info` coroutine from where it was paused.
 
 Each time the event-loop iterates over its' queue of tasks, the watcher-task will be run and check how the db-request is getting along. After say 6 cycles through the event-loop, the watcher-task finally sees that the db-request has completed. So, it grabs the result of that request, and adds another Task to the queue to resume the `get_user_info` coroutine with the db-request result. 
 
