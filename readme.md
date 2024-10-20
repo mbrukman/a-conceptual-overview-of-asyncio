@@ -24,7 +24,7 @@ Everything in asyncio happens relative to the event-loop. It's the star of the s
 
 In more technical terms, the event-loop contains a queue of Tasks to be run. Some Tasks are added directly by you, and some indirectly by asyncio. The event-loop pops a Task from the queue and invokes it (or gives it control), similar to a context-switch or calling a function. That Task then runs. Once it pauses or completes, it returns control to the event-loop. The event-loop then pops and invokes the next Task in its' queue. This process repeats indefinitely. Even if the queue is empty, the event-loop continues to cycle (somewhat aimlessly).
 
-Effective overall execution relies on Tasks sharing well. A greedy task could hog control and leave the other tasks to starve rendering the event-loop rather useless. 
+Effective overall execution relies on Tasks sharing well. A greedy task could hog control and leave the other tasks to starve rendering the overall event-loop approach rather useless. 
 
 ```python
 import asyncio
