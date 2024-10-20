@@ -116,11 +116,11 @@ Each time the event-loop iterates over its' queue of tasks, the watcher-task wil
 
 #### coroutine.send(), await, yield & StopIteration
 
-`coroutine.send(arg)` is the method used to start or resume a coroutine. 
+`coroutine.send(arg)` is the fundamental method used to start or resume a coroutine. 
 
 If the coroutine was paused and is now being resumed, the argument `arg` will be sent in as the return-value of the `yield` statement which originally paused it. When starting a coroutine, or when there's no value to send in, you can use `coroutine.send(None)`. The code snippet below illustrates both ways of using `coroutine.send(arg)`.
 
-`yield` pauses execution and returns control to the caller. In the example below, the caller is `await custom_awaitable` on line 12. Generally, `await` calls the `__await__` method of the given object and then percolates any yields it receives up the call-chain, in this case, that's back to `... = coroutine.send(None)` on line 21. 
+`yield` pauses execution and returns control to the caller. In the example below, the caller is `... = await custom_awaitable` on line 12. Generally, `await` calls the `__await__` method of the given object and then percolates any yields it receives up the call-chain, in this case, that's back to `... = coroutine.send(None)` on line 21. 
 
 Then, we resume the coroutine with `coroutine.send(42)` on line 26. The coroutine picks back up from where it yielded/paused on line 3. Finally, the coroutine executes the remaining statements in its' body. When a coroutine finishes it raises a `StopIteration` exception with the return-value attached to the exception.
 
@@ -170,7 +170,7 @@ Coroutine finished and provided value: 23.
 
 The only way to yield (or effectively cede control) from a coroutine is to `await` an object that `yield`s in its `__await__` method. That might sound odd to you. Frankly, it was to me too. 
 1. What about a `yield` directly within the coroutine? The coroutine becomes a generator-coroutine, a different beast entirely.
-2. What about a `yield from` within the coroutine to a function that `yield`s (i.e. plain generator)? SyntaxError: `yield from` not allowed in a coroutine.
+2. What about a `yield from` within the coroutine to a function that `yield`s (i.e. plain generator)? SyntaxError: `yield from` not allowed in a coroutine. 
 
 #### Futures
 
@@ -254,10 +254,9 @@ def __step_run_and_handle_result(self, exc):
     else:
         if self._asyncio_is_future_blocking is True:
             result._asyncio_is_future_blocking = False
-            result.add_done_callback(self.__wakeup, context=self._context)
+            result.add_done_callback(self.__wakeup)
         elif result is None:
-            # Bare yield relinquishes control for one event loop iteration.
-            self._loop.call_soon(self.__step, context=self._context)
+            self._loop.call_soon(self.__step)
 ```
 
 #### What does await do?
