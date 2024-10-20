@@ -82,7 +82,8 @@ super_special_task = asyncio.Task(coro=super_special_func(x=5), loop=event_loop)
 
 It's common to see a Task instantiated without explicitly specifying the event-loop it belongs to. Since there's only one event-loop (a global singleton), asyncio made the loop argument optional and will add it for you if it's left unspecified.
 ```python
-# The Task is implicitly tied to the event-loop by asyncio since the loop argument was left unspecified.
+# The Task is implicitly tied to the event-loop by asyncio since the loop 
+# argument was left unspecified.
 super_special_task = asyncio.Task(coro=super_special_func(x=5))
 ```
 
