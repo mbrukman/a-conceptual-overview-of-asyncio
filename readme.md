@@ -203,7 +203,7 @@ class Future:
 
 #### `await`-ing Tasks, Futures & coroutines
 
-Futures also have an important method: `__await__`. Here is a minimally modified snippet of the implementation found in `asyncio.futures.Future`. It's okay if it doesn't make complete sense now, we'll go through it in detail shortly. 
+Futures also have an important method: `__await__`. Here is the actual, entire implementation found in `asyncio.futures.Future`. It's okay if it doesn't make complete sense now, we'll go through it in detail shortly. 
 
 ```python
 class Future:
@@ -211,6 +211,7 @@ class Future:
     def __await__(self):
         
         if not self.done():
+            self._asyncio_is_future_blocking = True
             yield self
         
         if not self.done():
@@ -242,7 +243,23 @@ async def main():
 
 #### Tying it all together
 
+The actual method that invokes a Tasks' coroutine: `asyncio.tasks.Task.__step_run_and_handle_result` is about 80 lines long. For the sake of clarity, I've removed all of the edge-case error-handling, but the core logic remains unchanged.
 
+```python
+def __step_run_and_handle_result(self, exc):
+    try:
+        result = self.coro.send(None)
+    except StopIteration as exc:
+        super().set_result(exc.value)
+    else:
+        blocking = getattr(result, '_asyncio_is_future_blocking', None)
+        if blocking is not None:
+            result._asyncio_future_blocking = False
+            result.add_done_callback(self.__wakeup, context=self._context)
+        elif result is None:
+            # Bare yield relinquishes control for one event loop iteration.
+            self._loop.call_soon(self.__step, context=self._context)
+```
 
 #### What does await do?
 
