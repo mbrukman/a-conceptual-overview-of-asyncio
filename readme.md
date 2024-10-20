@@ -110,7 +110,7 @@ Each time the event-loop iterates over its' queue of tasks, the watcher-task wil
 
 If the coroutine was paused and is now being resumed, the argument `arg` will be sent in as the return-value of the `yield` statement which originally paused it. When starting a coroutine, or when there's no value you want to send in, you can use `coroutine.send(None)`. The code snippet below illustrates both ways of using `coroutine.send(arg)`.
 
-`yield` pauses execution and returns control to the caller. In the example below, the caller is `await custom_awaitable` on line 12. Generally, `await` calls the `__await__` method of the given object and then percolates any yields it receives up the call-chain, in this case, that's back to `... = coroutine.send(None)` on line 21.
+`yield` pauses execution and returns control to the caller. In the example below, the caller is `await custom_awaitable` on line 12. Generally, `await` calls the `__await__` method of the given object and then percolates any yields it receives up the call-chain, in this case, that's back to `... = coroutine.send(None)` on line 21. 
 
 Then, we resume the coroutine with `coroutine.send(42)` on line 26. The coroutine picks back up from where it yielded/paused on line 3. Finally, the coroutine executes the remaining statements in its' body. When a coroutine finishes it raises a `StopIteration` exception with the return-value attached to the exception.
 
@@ -168,7 +168,7 @@ A future is an object meant to represent a computation or process's status and i
 
 A future has a few important attributes. One is its' state which can be either 'pending', 'cancelled' or 'done'. Another is its' result which is set when the state transitions to 'done'. To be clear, a Future does not represent the actual computation to be done, like a coroutine does, instead it represents the status of that computation, kind of like a status-light (red, yellow or green) or indicator. Finally, a future stores callbacks or functions it should call once it finishes (i.e. the state becomes 'done').
 
-Here's an example implementation of what the Future class could look like:
+Here's that same idea stated in code:
 
 ```python
 class Future:
@@ -205,6 +205,11 @@ class Future:
 ```
 
 Task is a subclass of Future meaning it inherits its' attributes & methods. And Task does not override Future's `__await__` implementation.
+
+`await`-ing a Task or Future invokes that above `__await__` method which `yield`s control. `await`-ing a coroutine does not yield control! 
+
+#### Tying it all together
+
 
 
 #### What does await do?
