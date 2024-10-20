@@ -15,7 +15,7 @@ A few aspects particually drove my curiosity (read: drove me nuts). You should b
 
 The details of how asyncio works under the hood are fairly hairy and involved, so I offer two conceputal overviews. The first section titled Overview is meant to provide a sturdy mental model without getting into too many specifics of asyncio. The second titled "More of the nuts & bolts" gets into the nitty-gritty. If nitty-gritty is your jam, you're looking to more deeply understand what's going on or want to build your own operators on top of asyncio, I recommend starting with the first section and then proceeding through the second section. I've tried to ensure they don't repeat each other and instead build on each other.
 
-## Overview
+## Conceputal Overview
 
 #### Event Loop
 
@@ -71,7 +71,7 @@ That coroutine represents the function's body or logic. A coroutine has to be ex
 
 #### Tasks
 
-Tasks are coroutines tied to an event-loop; a simplified definition that's sufficient for the time being. We will flesh it out in the next section.
+Tasks are coroutines tied to an event-loop.
 
 ```python
 # This creates a Task object. Instantiating or creating a Task automatically 
@@ -79,9 +79,15 @@ Tasks are coroutines tied to an event-loop; a simplified definition that's suffi
 super_special_task = asyncio.Task(coro=super_special_func(x=5), loop=event_loop)
 ```
 
+It's common to see a Task instantiated without explicitly specifying the event-loop it belongs to. Since there's only one event-loop (a global singleton), asyncio made the loop argument optional and will add it for you if it's left unspecified.
+```python
+# The Task is implicitly tied to the event-loop by asyncio since the loop argument was left unspecified.
+super_special_task = asyncio.Task(coro=super_special_func(x=5))
+```
+
 #### Network I/O Example
 
-Performing a database request across a network might take half a second or so, but that's ages in computer-time. Your processor could have done millions or even billions of things in that time. The same is true for say downloading a movie, requesting a website, loading a file from disk into memory, etc. The general theme is those are all input/output (I/O) actions.
+Performing a database request across a network might take half a second or so, and that's ages in computer-time. Your processor could have done millions or even billions of things. The same is true for say downloading a movie, requesting a website, loading a file from disk into memory, etc. The general theme is those are all input/output (I/O) actions.
 
 ```python
 async def get_user_info(user_id: uuid.UUID):
@@ -102,13 +108,13 @@ To accomplish that we'll cede control from our coroutine to the event-loop after
 
 Each time the event-loop iterates over its' queue of tasks, the watcher-task will be run and check how the db-request is getting along. After say 6 cycles through the event-loop, the watcher-task finally sees that the db-request has completed. So, it grabs the result of that request, and adds another Task to the queue to resume the `get_user_info` coroutine with the db-request result. 
 
-## The nuts & bolts
+## Conceputal Overview Part 2: the nuts & bolts
 
 #### coroutine.send(), await, yield & StopIteration
 
 `coroutine.send(arg)` is the method used to start or resume a coroutine. 
 
-If the coroutine was paused and is now being resumed, the argument `arg` will be sent in as the return-value of the `yield` statement which originally paused it. When starting a coroutine, or when there's no value you want to send in, you can use `coroutine.send(None)`. The code snippet below illustrates both ways of using `coroutine.send(arg)`.
+If the coroutine was paused and is now being resumed, the argument `arg` will be sent in as the return-value of the `yield` statement which originally paused it. When starting a coroutine, or when there's no value to send in, you can use `coroutine.send(None)`. The code snippet below illustrates both ways of using `coroutine.send(arg)`.
 
 `yield` pauses execution and returns control to the caller. In the example below, the caller is `await custom_awaitable` on line 12. Generally, `await` calls the `__await__` method of the given object and then percolates any yields it receives up the call-chain, in this case, that's back to `... = coroutine.send(None)` on line 21. 
 
@@ -164,7 +170,7 @@ The only way to yield (or effectively cede control) from a coroutine is to `awai
 
 #### Futures
 
-A future is an object meant to represent a computation or process's status and it's result (if any), hence the term future i.e. still to come or not yet happened. 
+A future is an object meant to represent a computation or process's status and result (if any), hence the term future i.e. still to come or not yet happened. 
 
 A future has a few important attributes. One is its' state which can be either 'pending', 'cancelled' or 'done'. Another is its' result which is set when the state transitions to 'done'. To be clear, a Future does not represent the actual computation to be done, like a coroutine does, instead it represents the status and result of that computation, kind of like a status-light (red, yellow or green) or indicator. Finally, a future stores callbacks or functions it should call once its' state becomes 'done'.
 
