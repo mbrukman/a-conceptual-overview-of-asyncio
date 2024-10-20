@@ -4,7 +4,7 @@
 
 I've used `asyncio` a couple times now, but never really felt confident in my mental-model of how it works and how I can best use it. The official `asyncio` docs provide decent-enough documentation for each specific function in the package, but, in my opinion, lack a cohesive overview of the design and functionality to help the user make informed decisions about which tool in the `asyncio` tool-kit they ought to grab, or to recognize when `asyncio` is the entirely wrong tool-kit. This is my attempt to fill that gap. 
 
-There were a few blog-posts, stack-overflow discussons and other writings about `asyncio` that I found helpful, but didn't fully provide what I was looking for. I've linked the ones I enjoyed and/or found useful below.
+There were a few blog-posts, stack-overflow discussons and other writings about `asyncio` that I found helpful, but didn't fully provide what I was looking for. I've linked them below.
 
 A few aspects particually drove my curiosity (read: drove me nuts). You should be able to answer all these questions by the end of this article.
 - What's roughly happening behind the scenes when various objects are `await`-ed? 
@@ -166,7 +166,7 @@ The only way to yield (or effectively cede control) from a coroutine is to `awai
 
 A future is an object meant to represent a computation or process's status and it's result (if any), hence the term future i.e. still to come or not yet happened. 
 
-A future has a few important attributes. One is its' state which can be either 'pending', 'cancelled' or 'done'. Another is its' result which is set when the state transitions to 'done'. To be clear, a Future does not represent the actual computation to be done, like a coroutine does, instead it represents the status of that computation, kind of like a status-light (red, yellow or green) or indicator. Finally, a future stores callbacks or functions it should call once it finishes (i.e. the state becomes 'done').
+A future has a few important attributes. One is its' state which can be either 'pending', 'cancelled' or 'done'. Another is its' result which is set when the state transitions to 'done'. To be clear, a Future does not represent the actual computation to be done, like a coroutine does, instead it represents the status and result of that computation, kind of like a status-light (red, yellow or green) or indicator. Finally, a future stores callbacks or functions it should call once its' state becomes 'done'.
 
 Here's that same description stated in code:
 
@@ -178,7 +178,7 @@ class Future:
         self.callbacks = []
     
     def done(self) -> bool:
-        is_future_done = (self.state == 'done' or self.state == 'cancelled')
+        is_future_done = self.state == 'done'
         return is_future_done
 
     def add_callback(self, fn: typing.Callable):
