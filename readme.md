@@ -102,9 +102,7 @@ To accomplish that we'll cede control from our coroutine to the event-loop after
 
 Each time the event-loop iterates over its' queue of tasks, the watcher-task will be run and check how the db-request is getting along. After say 6 cycles through the event-loop, the watcher-task finally sees that the db-request has completed. So, it grabs the result of that request, and adds another Task to the queue to resume the `get_user_info` coroutine with the db-request result. 
 
-## More of the nuts & bolts
-
-I imagine you might have a few questions. I'll address these three. If you read these answers and still find your question unanswered, please open a PR or Issue on this repository!
+## The nuts & bolts
 
 #### coroutine.send(), await, yield & StopIteration
 
@@ -149,7 +147,7 @@ Then, we resume the coroutine with `coroutine.send(42)` on line 26. The coroutin
 30  print(f"Coroutine finished and provided value: {returned_value}.")
 ```
 
-That snippet produces this output
+That snippet produces this output:
 ```
 Beginning coroutine simple_func().
 Awaiting custom_awaitable...
@@ -159,6 +157,10 @@ Awaitable resumed with value: 42.
 Coroutine received value: 42 from awaitable.
 Coroutine finished and provided value: 23.
 ```
+
+The only way to yield (or effectively cede control) from a coroutine is to `await` an object that `yield`s in its `__await__` method. That might sound odd to you. Frankly, it was to me too. 
+1. What about a `yield` directly within the coroutine? The coroutine becomes a generator-coroutine, a different beast entirely.
+2. What about a `yield from` within the coroutine to a function that yields (i.e. plain generator)? SyntaxError: `yield from` not allowed in a coroutine.
 
 #### Futures
 
@@ -190,11 +192,9 @@ class Future:
         return self.result()
 ```
 
-It's okay and expected for that code to not make much sense to you right now. We'll go through it in detail shortly.
+Task is a subclass of Future meaning it inherits its' attributes & methods. And Task does not override Future's `__await__` implementation.
 
-Task is a subclass of Future meaning it inherits its' attributes & methods. And note, Task does not override Future's `__await__` method.
 
-`await` is a Python keyword introduced in Python3.5 and it can be used on any object that has an `__await__` method, including coroutines.
 
 #### What does await do?
 
