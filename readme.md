@@ -191,7 +191,7 @@ class Future:
             callback()
 ```
 
-Futures also have an important method: `__await__`. Here is a minimally modified snippet of the implementation found in `asyncio.futures.Future`. It's totally okay if it doesn't really make sense now, we'll go through it in detail shortly.
+Futures also have an important method: `__await__`. Here is a minimally modified snippet of the implementation found in `asyncio.futures.Future`. It's okay if it doesn't really make sense now, we'll go through it in detail shortly.
 
 ```python
 class Future:
@@ -204,10 +204,10 @@ class Future:
         return self.result()
 ```
 
-Task is a subclass of Future meaning it inherits its' attributes & methods. And Task does not override Future's `__await__` implementation.
+Task is a subclass of Future meaning it inherits its' attributes & methods. And Task does not override Future's `__await__` implementation. `await`-ing a Task or Future invokes that above `__await__` method and percolates the `yield` to relinquish control. 
 
 > [!IMPORTANT]  
-> `await`-ing a Task or Future invokes that above `__await__` method and percolates the `yield` to relinquish control. `await`-ing a coroutine does not relinquish control!
+>  Unlike Tasks and Futures, `await`-ing a coroutine does not cede control!
 
 That is, simply wrapping a coroutine in a Task first, then `await`-ing it will cede control. I imagine that design was intentional to allow the author to decide when they want to yield control versus keep it. 
 
