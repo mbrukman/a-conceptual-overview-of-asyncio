@@ -243,7 +243,7 @@ async def main():
 
 #### Tying it all together
 
-The actual method that invokes a Tasks' coroutine: `asyncio.tasks.Task.__step_run_and_handle_result` is about 80 lines long. For the sake of clarity, I've removed all of the edge-case error-handling, but the core logic remains unchanged.
+The actual method that invokes a Tasks' coroutine: `asyncio.tasks.Task.__step_run_and_handle_result` is about 80 lines long. For the sake of clarity, I've removed all of the edge-case error-handling and simplified some aspects, but the core logic remains unchanged.
 
 ```python
 def __step_run_and_handle_result(self, exc):
