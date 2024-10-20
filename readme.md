@@ -206,7 +206,8 @@ class Future:
 
 Task is a subclass of Future meaning it inherits its' attributes & methods. And Task does not override Future's `__await__` implementation.
 
-`await`-ing a Task or Future invokes that above `__await__` method which `yield`s control. `await`-ing a coroutine does not yield control! 
+> [!IMPORTANT]  
+> `await`-ing a Task or Future invokes that above `__await__` method and percolates the `yield` to relinquish control. `await`-ing a coroutine does not relinquish control! Frankly, I don't know why `await`-ing coroutines was designed not to yield control; it seems like an easy way to trip yourself up.
 
 #### Tying it all together
 
