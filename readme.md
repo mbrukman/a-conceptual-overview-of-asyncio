@@ -211,8 +211,10 @@ class Future:
     def __await__(self):
         if not self.done():
             yield self
+        
         if not self.done():
             raise RuntimeError("await wasn't used with future")
+        
         return self.result()
 ```
 
