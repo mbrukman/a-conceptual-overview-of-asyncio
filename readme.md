@@ -209,6 +209,7 @@ Futures also have an important method: `__await__`. Here is a minimally modified
 class Future:
     ...
     def __await__(self):
+        
         if not self.done():
             yield self
         
@@ -227,10 +228,15 @@ async def simple_func():
     ...
 
 async def main():
+    
     # This will invoke simple_func() without yielding to the event-loop.
     await simple_func()
-    # This will add the Task to the event-loop then yield control. Eventually
-    # the event-loop will invoke simple_func(). 
+
+    # This line does two things. First it instantiates the Task which will 
+    # add it to the event-loops' queue. Then, it awaits the Task which will
+    # hit the yield in Future.__await__ and percolate it up allowing the
+    # event-loop to regain control. Eventually, the event-loop will invoke
+    # simple_func().
     await Task(coro=simple_func())
 ```
 
