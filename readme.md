@@ -216,10 +216,20 @@ class Future:
 
 Task is a subclass of Future meaning it inherits its' attributes & methods. And Task does not override Future's `__await__` implementation. `await`-ing a Task or Future invokes that above `__await__` method and percolates the `yield` to relinquish control. 
 
-> [!IMPORTANT]  
->  **Unlike Tasks and Futures, `await`-ing a coroutine does not cede control!**
 
-That is, simply wrapping a coroutine in a Task first, then `await`-ing it will cede control. I imagine that design was intentional to allow the author to decide when they want to yield control versus keep it. 
+***Unlike Tasks and Futures, `await`-ing a coroutine does not cede control!*** That is, wrapping a coroutine in a Task first, then `await`-ing it will cede control. I imagine that design decision was to allow the author to decide when they want to yield control versus keep it. 
+
+```python
+async def simple_func():
+    ...
+
+async def main():
+    # This will invoke simple_func() without yielding to the event-loop.
+    await simple_func()
+    # This will add the Task to the event-loop then yield control. Eventually
+    # the event-loop will invoke simple_func(). 
+    await Task(coro=simple_func())
+```
 
 #### Tying it all together
 
