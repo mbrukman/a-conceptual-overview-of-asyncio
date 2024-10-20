@@ -10,6 +10,7 @@ A few aspects particually drove my curiosity (read: drove me nuts). You should b
 - What's roughly happening behind the scenes when various objects are `await`-ed? 
 - How does `asyncio` differentiate between a task which doesn't need cpu-time to make progress towards completion (for example a network-request or file-read) as opposed to a task that does need cpu-time to make progress (for example computing the $n^{th}$ fibonacci number). 
 - How does `asyncio.sleep()` run asynchronously while `time.sleep()` does not? 
+- How would I go about writing my own asynchronous variant of some operation (e.g. sleep, network-request, file-read, etc.)?
 
 ## Introduction
 
