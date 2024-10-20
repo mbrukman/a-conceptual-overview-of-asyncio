@@ -22,7 +22,9 @@ The details of how asyncio works under the hood are fairly hairy and involved, s
 
 Everything in asyncio happens relative to the event-loop. It's the star of the show and there's only one. It's kind of like an orchestra conductor or military general. She's behind the scenes managing resources. Some power is explicitly granted to her, but a lot of her ability to get things done comes from the respect & cooperation of her subordinates.
 
-In more technical terms, the event-loop contains a queue of Tasks to be run. Some Tasks are added directly by you, and some indirectly by asyncio. The event-loop invokes a Task by giving it control, similar to a context-switch or calling a function. That Task then runs. Once it pauses or completes, it returns control to the event-loop. The event-loop then invokes the next Task in its' queue. This process repeats indefinitely. Effective overall execution relies on Tasks sharing well. A greedy task could hog control and leave the other tasks to starve rendering the event-loop rather useless. 
+In more technical terms, the event-loop contains a queue of Tasks to be run. Some Tasks are added directly by you, and some indirectly by asyncio. The event-loop pops a Task from the queue and invokes it (or gives it control), similar to a context-switch or calling a function. That Task then runs. Once it pauses or completes, it returns control to the event-loop. The event-loop then pops and invokes the next Task in its' queue. This process repeats indefinitely. Even if the queue is empty, the event-loop continues to run.
+
+Effective overall execution relies on Tasks sharing well. A greedy task could hog control and leave the other tasks to starve rendering the event-loop rather useless. 
 
 ```python
 import asyncio
