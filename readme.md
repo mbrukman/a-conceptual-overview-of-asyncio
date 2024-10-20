@@ -160,7 +160,7 @@ Coroutine finished and provided value: 23.
 
 The only way to yield (or effectively cede control) from a coroutine is to `await` an object that `yield`s in its `__await__` method. That might sound odd to you. Frankly, it was to me too. 
 1. What about a `yield` directly within the coroutine? The coroutine becomes a generator-coroutine, a different beast entirely.
-2. What about a `yield from` within the coroutine to a function that yields (i.e. plain generator)? SyntaxError: `yield from` not allowed in a coroutine.
+2. What about a `yield from` within the coroutine to a function that `yield`s (i.e. plain generator)? SyntaxError: `yield from` not allowed in a coroutine.
 
 #### Futures
 
