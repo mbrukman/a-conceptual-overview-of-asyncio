@@ -21,7 +21,7 @@ The details of how asyncio works under the hood are fairly hairy and involved, s
 
 Everything in asyncio happens relative to the event-loop. It's the star of the show and there's only one. It's kind of like an orchestra conductor or military general. She's behind the scenes managing resources. Some power is explicitly granted to her, but a lot of her ability to get things done comes from the respect & cooperation of her subordinates.
 
-In more technical terms, the event-loop contains a queue of Tasks to be run. Some Tasks are added directly by you, and some indirectly by asyncio. The event-loop invokes a Task by giving it control, similar to a context-switch or calling a function. That Task then runs. Once it pauses or completes, it returns control to the event-loop. The event-loop then invokes the next Task in its' queue. This process repeats indefinitely. A greedy task could hog control and leave the other tasks to starve rendering the event-loop rather useless. 
+In more technical terms, the event-loop contains a queue of Tasks to be run. Some Tasks are added directly by you, and some indirectly by asyncio. The event-loop invokes a Task by giving it control, similar to a context-switch or calling a function. That Task then runs. Once it pauses or completes, it returns control to the event-loop. The event-loop then invokes the next Task in its' queue. This process repeats indefinitely. Effective overall execution relies on Tasks sharing well. A greedy task could hog control and leave the other tasks to starve rendering the event-loop rather useless. 
 
 ```python
 import asyncio
@@ -67,7 +67,7 @@ Calling an asynchronous function creates and returns a coroutine object.
 
 The terms "asynchronous function" (or "coroutine function") and "coroutine object" are often conflated as coroutine. I find that a tad confusing. In this article, coroutine will exclusively mean "coroutine object". 
 
-That coroutine represents the function's body or logic. A coroutine has to be explicitly started; merely creating the coroutine does not start it. Notably, it can be paused & resumed. That pasuing & resuming ability is what makes it asynchronous and special!
+That coroutine represents the function's body or logic. A coroutine has to be explicitly started; merely creating the coroutine does not start it. Notably, it can be paused & resumed. That pausing & resuming ability is what makes it asynchronous and special!
 
 #### Tasks
 
@@ -166,17 +166,29 @@ The only way to yield (or effectively cede control) from a coroutine is to `awai
 
 A future is an object meant to represent a computation or process's status and it's result (if any), hence the term future i.e. still to come or not yet happened. 
 
-A future has a few important attributes. One is its' state which can be either 'pending', 'cancelled' or 'done'. Another is its' result which is set when the state transitions to 'done' and can be any Python object. To be clear, a Future does not represent the actual computation to be done, like a coroutine does, instead it represents the status of that computation, kind of like a status-light (red, yellow or green) or indicator. 
+A future has a few important attributes. One is its' state which can be either 'pending', 'cancelled' or 'done'. Another is its' result which is set when the state transitions to 'done'. To be clear, a Future does not represent the actual computation to be done, like a coroutine does, instead it represents the status of that computation, kind of like a status-light (red, yellow or green) or indicator. Finally, a future stores callbacks or functions it should call once it finishes (i.e. the state becomes 'done').
+
+Here's an example implementation of what the Future class could look like:
 
 ```python
 class Future:
     def __init__(self):
         self.state = 'pending'
         self.result = None
+        self.callbacks = []
     
+    def done(self) -> bool:
+        is_future_done = (self.state == 'done' or self.state == 'cancelled')
+        return is_future_done
+
+    def add_callback(self, fn: typing.Callable):
+        self.callbacks.append(fn)
+
     def mark_done(self, result):
         self.state = 'done'
         self.result = result
+        for callback in self.callbacks:
+            callback()
 ```
 
 Futures also have an important method: `__await__`. Here is a minimally modified snippet of the implementation found in `asyncio.futures.Future`.
@@ -193,7 +205,6 @@ class Future:
 ```
 
 Task is a subclass of Future meaning it inherits its' attributes & methods. And Task does not override Future's `__await__` implementation.
-
 
 
 #### What does await do?
