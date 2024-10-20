@@ -168,7 +168,7 @@ A future is an object meant to represent a computation or process's status and i
 
 A future has a few important attributes. One is its' state which can be either 'pending', 'cancelled' or 'done'. Another is its' result which is set when the state transitions to 'done'. To be clear, a Future does not represent the actual computation to be done, like a coroutine does, instead it represents the status of that computation, kind of like a status-light (red, yellow or green) or indicator. Finally, a future stores callbacks or functions it should call once it finishes (i.e. the state becomes 'done').
 
-Here's that same idea stated in code:
+Here's that same description stated in code:
 
 ```python
 class Future:
