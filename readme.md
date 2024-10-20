@@ -6,7 +6,10 @@ I've used `asyncio` a couple times now, but never really felt confident in my me
 
 There were a few blog-posts, stack-overflow discussons and other writings about `asyncio` that I found helpful, but didn't fully provide what I was looking for. I've linked the ones I enjoyed and/or found useful below.
 
-A few aspects particually drove my curiosity (read: drove me nuts). I wanted to know what's roughly happening behind the scenes when various objects are awaited. And, how does `asyncio` differentiate between a task which doesn't need cpu-time to make progress towards completion (for example a network-request or file-read) as opposed to a task that does need cpu-time to make progress (for example computing the $n^{th}$ fibonacci number). In other words, how does `asyncio.sleep()` run asynchronously while `time.sleep()` does not? 
+A few aspects particually drove my curiosity (read: drove me nuts). You should be able to answer all these questions by the end of this article.
+- What's roughly happening behind the scenes when various objects are `await`-ed? 
+- How does `asyncio` differentiate between a task which doesn't need cpu-time to make progress towards completion (for example a network-request or file-read) as opposed to a task that does need cpu-time to make progress (for example computing the $n^{th}$ fibonacci number). 
+- How does `asyncio.sleep()` run asynchronously while `time.sleep()` does not? 
 
 ## Introduction
 
@@ -18,7 +21,7 @@ The details of how asyncio works under the hood are fairly hairy and involved, s
 
 Everything in asyncio happens relative to the event-loop. It's the star of the show and there's only one. It's kind of like an orchestra conductor or military general. She's behind the scenes managing resources. Some power is explicitly granted to her, but a lot of her ability to get things done comes from the respect & cooperation of her subordinates.
 
-In more technical terms, the event-loop contains a queue of Tasks to be run. Some Tasks are added directly by you, and some indirectly by asyncio. The event-loop invokes a Task by giving it control, similar to a context-switch or calling a function. That Task then runs. Once it pauses or completes, it returns control to the event-loop. The event-loop then invokes the next Task in its' queue. This process repeats indefinitely. 
+In more technical terms, the event-loop contains a queue of Tasks to be run. Some Tasks are added directly by you, and some indirectly by asyncio. The event-loop invokes a Task by giving it control, similar to a context-switch or calling a function. That Task then runs. Once it pauses or completes, it returns control to the event-loop. The event-loop then invokes the next Task in its' queue. This process repeats indefinitely. A greedy task could hog control and leave the other tasks to starve rendering the event-loop rather useless. 
 
 ```python
 import asyncio
@@ -68,7 +71,7 @@ That coroutine represents the function's body or logic. A coroutine has to be ex
 
 #### Tasks
 
-Tasks are coroutines tied to an event-loop. That's a simplified definition that's sufficient for the time being. We will flesh it out in the next section.
+Tasks are coroutines tied to an event-loop; a simplified definition that's sufficient for the time being. We will flesh it out in the next section.
 
 ```python
 # This creates a Task object. Instantiating or creating a Task automatically 
