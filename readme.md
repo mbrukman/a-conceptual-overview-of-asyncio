@@ -16,9 +16,9 @@ The details of how asyncio works under the hood are fairly hairy and involved, s
 
 #### Event Loop
 
-Everything in asyncio happens relative to the event-loop. It's the star of the show. It's also kind of like an orchestra conductor or military general. She's behind the scenes managing resources. Some power is explicitly granted to her, but a lot of her ability to get things done comes from the respect & cooperation of her subordinates.
+Everything in asyncio happens relative to the event-loop. It's the star of the show and there's only one. It's kind of like an orchestra conductor or military general. She's behind the scenes managing resources. Some power is explicitly granted to her, but a lot of her ability to get things done comes from the respect & cooperation of her subordinates.
 
-In more technical terms, the event-loop contains a queue of Tasks to be run. Some Tasks are added directly by you, and some indirectly by asyncio. The event-loop invokes a Task by giving it control, similar to a context-switch or calling a function. That Task then runs. Once it pauses or completes, it returns control to the event-loop. The event-loop then invokes the next Task in the queue. This process repeats indefinitely. 
+In more technical terms, the event-loop contains a queue of Tasks to be run. Some Tasks are added directly by you, and some indirectly by asyncio. The event-loop invokes a Task by giving it control, similar to a context-switch or calling a function. That Task then runs. Once it pauses or completes, it returns control to the event-loop. The event-loop then invokes the next Task in its' queue. This process repeats indefinitely. 
 
 ```python
 import asyncio
@@ -91,11 +91,11 @@ get_user_info = asyncio.Task(coro=get_user_info(), loop=event_loop)
 event_loop.run_forever()
 ```
 
-The underlying hardware responsible for performing the network request and placing the response-bytes them into main-memory can run seperately from the CPU. Of course, that's all for nothing if we don't give the CPU something to do in the meantime.
+The underlying hardware responsible for performing the network request and placing the response-bytes into main-memory can run seperately from the CPU. That's all for nothing if we don't let the CPU something do something in the meantime.
 
-In this case, we want to cede control back to the event-loop from the `get_user_info` coroutine just after calling `db.get(user_id)`. Then, return to the coroutine once that db-request has finished. 
+In this case, we want to let the CPU focus on other activities after we call `db.get(user_id)`. Then, have the CPU come back once the networking hardware has done its' part.
 
-To accomplish that we'll first cede control from our coroutine to the event-loop. The event-loop then creates a new Task, we'll refer to it as a watcher-task (though that's not official lingo by any means), with some important responsibilities. That watcher-task will check on the db-request to see if it's done. And it'll keep note of how to resume the `get_user_info` coroutine from where it was paused.
+To accomplish that we'll cede control from our coroutine to the event-loop after calling `db.get(user_id)`. The event-loop then creates a new Task, that we'll refer to as a watcher-task (though that's not official lingo by any means), with some important responsibilities. That watcher-task will check on the db-request to see if it's done. And it'll keep note of how to resume the `get_user_info` coroutine from where it was paused.
 
 Each time the event-loop iterates over its' queue of tasks, the watcher-task will be run and check how the db-request is getting along. After say 6 cycles through the event-loop, the watcher-task finally sees that the db-request has completed. So, it grabs the result of that request, and adds another Task to the queue to resume the `get_user_info` coroutine with the db-request result. 
 
@@ -103,15 +103,15 @@ Each time the event-loop iterates over its' queue of tasks, the watcher-task wil
 
 I imagine you might have a few questions. I'll address these three. If you read these answers and still find your question unanswered, please open a PR or Issue on this repository!
 
-#### coroutine.send(), await & yield
+#### coroutine.send(), await, yield & StopIteration
 
 `coroutine.send(arg)` is the method used to start or resume a coroutine. 
 
 If the coroutine was paused and is now being resumed, the argument `arg` will be sent in as the return-value of the `yield` statement which originally paused it. When starting a coroutine, or when there's no value you want to send in, you can use `coroutine.send(None)`. The code snippet below illustrates both ways of using `coroutine.send(arg)`.
 
-`yield` pauses execution and returns control to the caller. In the example below, the caller is `await custom_awaitable` on line 13. Generally, `await` calls the `__await__` method of the given object and then percolates any yields it receives up the call-chain, in this case, that's back to `coroutine.send(None)` on line 21.
+`yield` pauses execution and returns control to the caller. In the example below, the caller is `await custom_awaitable` on line 12. Generally, `await` calls the `__await__` method of the given object and then percolates any yields it receives up the call-chain, in this case, that's back to `... = coroutine.send(None)` on line 21.
 
-Then, we resume the coroutine with `coroutine.send(42)` on line 26. The coroutine picks back up from where it yielded on line 3. 
+Then, we resume the coroutine with `coroutine.send(42)` on line 26. The coroutine picks back up from where it yielded/paused on line 3. Finally, the coroutine executes the remaining statements in its' body. When a coroutine finishes it raises a `StopIteration` exception with the return-value attached to the exception.
 
 ```python
 1  class CustomAwaitable:
@@ -122,24 +122,39 @@ Then, we resume the coroutine with `coroutine.send(42)` on line 26. The coroutin
 6 
 7  async def simple_func():
 8      print("Beginning coroutine simple_func().")
-9      
-10     custom_awaitable = CustomAwaitable()
-11     print("Awaiting custom_awaitable")
-12    
-13     value_from_awaitable = await custom_awaitable
-14     print(f"Coroutine received value: {value_from_awaitable} from awaitable.")
-15  
+9      custom_awaitable = CustomAwaitable()
+10     print("Awaiting custom_awaitable...")
+11    
+12     value_from_awaitable = await custom_awaitable
+13     print(f"Coroutine received value: {value_from_awaitable} from awaitable.")     
+14     return 23
+15
 16  # Create the coroutine.
 17  coroutine = simple_func()
 18  
 19  # Begin the coroutine. Store any results yielded or returned by the coroutine into
 20  # variable: coroutine_intermediate_result.
 21  coroutine_intermediate_result = coroutine.send(None)
-22  print(f"Coroutine paused and returned intermediate value: {coroutine_intermediate_result}")
+22  print(f"Coroutine paused and returned intermediate value: {coroutine_intermediate_result}.")
 23  
 24  # Resume the coroutine and pass in the number 42 when doing so. 
 25  print(f"Resuming coroutine and sending in value: 42.")
-26  coroutine.send(42)
+26  try:
+27      coroutine.send(42)
+28  except StopIteration as e:
+29      returned_value = e.value
+30  print(f"Coroutine finished and provided value: {returned_value}.")
+```
+
+That snippet produces this output
+```
+Beginning coroutine simple_func().
+Awaiting custom_awaitable...
+Coroutine paused and returned intermediate value: 7.
+Resuming coroutine and sending in value: 42.
+Awaitable resumed with value: 42.
+Coroutine received value: 42 from awaitable.
+Coroutine finished and provided value: 23.
 ```
 
 #### Futures
