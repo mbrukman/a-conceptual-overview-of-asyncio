@@ -191,7 +191,7 @@ class Future:
             callback()
 ```
 
-Futures also have an important method: `__await__`. Here is a minimally modified snippet of the implementation found in `asyncio.futures.Future`.
+Futures also have an important method: `__await__`. Here is a minimally modified snippet of the implementation found in `asyncio.futures.Future`. It's totally okay if it doesn't really make sense now, we'll go through it in detail shortly.
 
 ```python
 class Future:
