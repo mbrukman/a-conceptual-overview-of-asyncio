@@ -252,9 +252,8 @@ def __step_run_and_handle_result(self, exc):
     except StopIteration as exc:
         super().set_result(exc.value)
     else:
-        blocking = getattr(result, '_asyncio_is_future_blocking', None)
-        if blocking is not None:
-            result._asyncio_future_blocking = False
+        if self._asyncio_is_future_blocking is True:
+            result._asyncio_is_future_blocking = False
             result.add_done_callback(self.__wakeup, context=self._context)
         elif result is None:
             # Bare yield relinquishes control for one event loop iteration.
