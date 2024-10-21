@@ -276,17 +276,17 @@ We'll analyze how control flows through this example program and the methods `Ta
 10 loop.run_forever()
 ```
 
-1. Line 8 creates an event-loop, line 9 creates the Task main_task and adds it to the event-loop, line 10 invokes the event-loop.
-2. The event-loop pops the Task main_task then invokes it by calling `main_task.step()`. We enter the try-block on line 4 then begin the
-coroutine main() on line 5. 
-3. The coroutine main() creates a new Task func_task on line 5 and adds it to the event-loop. Line 6 awaits func_task. First, 
-func_task.__await__ is called. We enter the first if-block in Future.__await__ on line 5, since the Task is obviously not done given
-it was just created. The newly made task is then yielded on line 6. Control briefly returns to coroutine main() on line 6 which percolates
-the yield and func_task object back to the coro.send() on line 5 in `main_task.step()`.
-4. No StopIteration was raised so the else in the try-block executes. The attribute set on func_task informs us we should block main_task on it. A done-callback: `main_task.step` is added to the func_task.
-5. The event-loop continues. It pops func_task and invokes it. Control goes to the coroutine func() on line 2. It prints, then finishes and raises
-a StopIteration exception. The except in `func_task.step` catches it, and marks the future as done. Finally, the done-callbacks of `func_task` i.e. (`main_task.step`) are added to the event-loops' queue.
-6. The event-loop continues. It pops `main_task` and resumes the coroutine on line 6. main() raises a StopIteration exception, the main_task is marked as done, and the event-loop cycles ever onwards.
+1. Line 8 creates an event-loop, line 9 creates `main_task` and adds it to the event-loop, line 10 invokes the event-loop.
+2. The event-loop pops `main_task` then invokes it by calling `main_task.step()`. We enter the try-block on line 4 then begin the
+coroutine `main` on line 5. 
+3. The coroutine `main` creates `func_task` on line 5 and adds it to the event-loop. Line 6 awaits `func_task`. First, 
+func_task.\_\_await\_\_ is called. `func_task` is not done given it was just created, so we enter the first if-block in Future.__await__ on line 5.
+`func_task` is yielded on line 6. Control briefly returns to coroutine `main` on line 6 which percolates
+the yield and `func_task` object back to the coro.send() on line 5 in `main_task.step()`. 
+4. `result` now equals `func_task` and `self` is `main_task`. No StopIteration was raised so the else in the try-block executes. The attribute set on `func_task` informs us we should block `main_task` on it. A done-callback: `main_task.step` is added to the func_task.
+5. The event-loop continues. It pops `func_task` and invokes it. Control goes to the coroutine `func` on line 2. It prints, then finishes and raises
+a StopIteration exception. The except in `func_task.step` catches it, and marks `func_task` as done. Finally, the done-callbacks of `func_task` i.e. (`main_task.step`) are added to the event-loops' queue.
+6. The event-loop continues. It pops `main_task` and resumes the coroutine on line 6. `main` raises a StopIteration exception, the `main_task` is marked as done, and the event-loop cycles ever onwards.
 
 #### What does await do?
 
