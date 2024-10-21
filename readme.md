@@ -261,7 +261,7 @@ The actual method that invokes a Tasks' coroutine: `asyncio.tasks.Task.__step_ru
 13                 self._loop.call_soon(self.__step)
 ```
 
-We'll analyze how control flows through this example program and the methods `Task.__step_run_and_handle_result` & `Future.__await__`.
+We'll analyze how control flows through this example program and the methods `Task.step` & `Future.__await__`.
 
 ```python
 1  async def func():
