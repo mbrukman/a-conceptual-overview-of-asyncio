@@ -206,18 +206,18 @@ class Future:
 Futures also have an important method: `__await__`. Here is the actual, entire implementation found in `asyncio.futures.Future`. It's okay if it doesn't make complete sense now, we'll go through it in detail shortly. 
 
 ```python
-class Future:
-    ...
-    def __await__(self):
-        
-        if not self.done():
-            self._asyncio_is_future_blocking = True
-            yield self
-        
-        if not self.done():
-            raise RuntimeError("await wasn't used with future")
-        
-        return self.result()
+1  class Future:
+2      ...
+3      def __await__(self):
+4      
+5          if not self.done():
+6              self._asyncio_is_future_blocking = True
+7              yield self
+8        
+9          if not self.done():
+10              raise RuntimeError("await wasn't used with future")
+11        
+12         return self.result()
 ```
 
 Task is a subclass of Future meaning it inherits its' attributes & methods. And Task does not override Futures' `__await__` implementation. `await`-ing a Task or Future invokes that above `__await__` method and percolates the `yield` to relinquish control. 
@@ -246,20 +246,22 @@ async def main():
 The actual method that invokes a Tasks' coroutine: `asyncio.tasks.Task.__step_run_and_handle_result` is about 80 lines long. For the sake of clarity, I've removed all of the edge-case error-handling, simplified some aspects and renamed it, but the core logic remains unchanged.
 
 ```python
-def __step_run_and_handle_result(self):
-    try:
-        result = self.coro.send(None)
-    except StopIteration as e:
-        super().set_result(e.value)
-    else:
-        if self._asyncio_is_future_blocking is True:
-            result._asyncio_is_future_blocking = False
-            result.add_done_callback(self.__wakeup)
-        elif result is None:
-            self._loop.call_soon(self.__step)
+1  class Task:
+2  ...
+3      def step(self):
+4          try:
+5              result = self.coro.send(None)
+6          except StopIteration as e:
+7              super().set_result(e.value)
+8          else:
+9              if result._asyncio_is_future_blocking is True:
+10                 result._asyncio_is_future_blocking = False
+11                 result.add_done_callback(self.__step)
+12             elif result is None:
+13                 self._loop.call_soon(self.__step)
 ```
 
-We'll analyze how control flows through this program and the methods `Task.__step_run_and_handle_result` & `Future.__await__`.
+We'll analyze how control flows through this example program and the methods `Task.__step_run_and_handle_result` & `Future.__await__`.
 
 ```python
 1  async def func():
@@ -274,30 +276,17 @@ We'll analyze how control flows through this program and the methods `Task.__ste
 10 loop.run_forever()
 ```
 
-1. `loop.run_forever()` eventually calls `main_task.__step_run_and_handle_result`
-2. `main_task.__step_run_and_handle_result` begins the coroutine main() via `... = self.coro.send(None)`.
-3. `func_task` is added to the event-loop by line 5. 
-4. The `await` on the next line calls `func_task.__await__` (i.e. `Future.__await`). 
-  `func_task` has not yet run, so its' state is, of course, not 'done'. The attribute 
-  `_asyncio_is_future_blocking` is set to True on the `func_task` object, then the object is 
-  yielded. The `await` percolates that yield back to the `... = self.coro.send(None)` line.
-5. We're back in `main_task.__step_run_and_handle_result` and result = `func_task`. 
-  No `StopIteration` exception was raised, so we proceed to the else-block. We set the attribute
-  `func_task._asyncio_is_future_blocking` back to False, and add a done-callback to `func_task`
-  indicating it should invoke `main_task.__wakeup` once its' state becomes done.
-6. The loop iterates to the next task in its' queue: `func_task`. `func_task` is invoked, the 
-  coroutine func() finishes and raises a `StopIteration` exception.
-7. We're now in `func_task.__step_run_and_handle_result` handling the `StopIteration` exception.
-  We indicate `func_task` is 'done' by setting its' result, which also triggers the callbacks 
-  present in done-callbacks: `main_task.__wakeup`. Technically, the callbacks aren't directly
-  triggered and instead are added to the event-loop.
-8. `main_task.__wakeup` is invoked by the event-loop which after a few steps is back in 
-  `main_task.__step_run_and_handle_result`. The `main_task.coro.send(None)` unpauses `main()`
-  which picks back up where it yielded -- in `func_task.__await__`. The next-line ensures
-  the task we were waiting for is actually done. Then, it returns the result which in this case
-  is just None. 
-9. The return-value of `await func_task` isn't used anyways. `main()` finishes and raises a StopIteration
-  exception. The result is set in `main_task.__step_run_and_handle_result` and the event-loop continues cycling.
+1. Line 8 creates an event-loop, line 9 creates the Task main_task and adds it to the event-loop, line 10 invokes the event-loop.
+2. The event-loop pops the Task main_task then invokes it by calling `main_task.step()`. We enter the try-block on line 4 then begin the
+coroutine main() on line 5. 
+3. The coroutine main() creates a new Task func_task on line 5 and adds it to the event-loop. Line 6 awaits func_task. First, 
+func_task.__await__ is called. We enter the first if-block in Future.__await__ on line 5, since the Task is obviously not done given
+it was just created. The newly made task is then yielded on line 6. Control briefly returns to coroutine main() on line 6 which percolates
+the yield and func_task object back to the coro.send() on line 5 in `main_task.step()`.
+4. No StopIteration was raised so the else in the try-block executes. The attribute set on func_task informs us we should block main_task on it. A done-callback: `main_task.step` is added to the func_task.
+5. The event-loop continues. It pops func_task and invokes it. Control goes to the coroutine func() on line 2. It prints, then finishes and raises
+a StopIteration exception. The except in `func_task.step` catches it, and marks the future as done. Finally, the done-callbacks of `func_task` i.e. (`main_task.step`) are added to the event-loops' queue.
+6. The event-loop continues. It pops `main_task` and resumes the coroutine on line 6. main() raises a StopIteration exception, the main_task is marked as done, and the event-loop cycles ever onwards.
 
 #### What does await do?
 
