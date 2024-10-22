@@ -302,7 +302,7 @@ We'll analyze how control flows through this example program and the methods `Ta
 1. **`program.main`**
     * `await` percolates the yield and the yielded value -- `func_task`.
 1. **`main_task.step`**
-    * `result` is now `func_task`. No StopIteration was raised so the else in the try-block on line 8 executes. The attribute set on `func_task` informs us we should block `main_task` on it. A done-callback: `main_task.step` is added to the func_task.
+    * `result` is now `func_task`. No StopIteration was raised so the else in the try-block on line 8 executes. The attribute set on `func_task` informs us we should block `main_task` on it. A done-callback: `main_task.step` is added to the func_task. The `step` method ends and returns to the event-loop.
 1. **`event-loop`**
     * The event-loop cycles to the next task in its queue. The event-loop pops `func_task` from its queue and invokes it by calling `func_task.step()`.
 1. **`func_task.step`**
@@ -310,7 +310,7 @@ We'll analyze how control flows through this example program and the methods `Ta
 1. **`program.func`**
     * Control goes to the coroutine `func` on line 2. It prints, then finishes and raises a StopIteration exception.
 1. **`func_task.step`**
-    * The StopIteration exception is caught so we go to line 7. `func_task` is marked as done. So, the done-callbacks of `func_task` i.e. (`main_task.step`) are added to the event-loops' queue.
+    * The StopIteration exception is caught so we go to line 7. `func_task` is marked as done. So, the done-callbacks of `func_task` i.e. (`main_task.step`) are added to the event-loops' queue. The `step` method ends and returns control to the event-loop.
 1. **`event-loop`**
     * The event-loop cycles to the next task in its queue. The event-loop pops `main_task` and resumes it by calling `main_task.step()`.
 
