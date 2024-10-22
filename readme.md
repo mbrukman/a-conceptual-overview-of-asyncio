@@ -4,6 +4,7 @@
 
 - [ ] Understanding async generators
 - [ ] Add an async generators section (if necessary)
+- [ ] Review & rename the hypotheses.
 - [ ] A fuller example w/ file I/O
 - [ ] Remaining details, e.g. 3 queues & select/events
 - [ ] Final read-through
@@ -17,7 +18,7 @@ There were a few blog-posts, stack-overflow discussons and other writings about 
 
 A few aspects particually drove my curiosity (read: drove me nuts). You should be able to answer all these questions by the end of this article.
 - What's roughly happening behind the scenes when various objects are `await`-ed? 
-- How does `asyncio` differentiate between a task which doesn't need cpu-time to make progress towards completion (for example a network-request or file-read) as opposed to a task that does need cpu-time to make progress (for example computing the $n^{th}$ fibonacci number). 
+- How does `asyncio` differentiate between a task which doesn't need cpu-time to make progress towards completion (for example a network-request or file-read) as opposed to a task that does need cpu-time to make progress (for example, computing n-factorial). 
 - How does `asyncio.sleep()` run asynchronously while `time.sleep()` does not? 
 - How would I go about writing my own asynchronous variant of some operation (e.g. sleep, network-request, file-read, etc.)?
 
@@ -312,110 +313,6 @@ Resuming a Task
 Pausing a Task
 Glossary
 Things to Remember
-
-
-
-
-
-### Asynchronous Functions (async)
-
-
-
-
-
-
-### Futures (asyncio.futures.Future)
-
-
-
-Here's a bit of a contrived example. The computation in this case is computing a factorial. The future object can let us know when the computation is done and what the result of the computation was. Of course, this isn't a very practical use-case, but perhaps you can imagine how such a Future object could be useful when it comes to file or network I/O. Reading a huge file from disk into memory may take a while and not need cpu resources, which we could devote to running another part of our program rather than merely idling. 
-
-
-
-### Tasks (asyncio.tasks.Task)
-
-Tasks are the love-child of Futures & coroutine-objects. In technical terms, Task subclasses Future thereby inherting its' properties and holds an instance attribute of a coroutine-object. In other words, a Task bundles together a computation and that computation's status-light.
-
-Here's some code which illustrates the same idea (if you're into that kind of thing).
-```
-import collections
-
-class Task(Future):
-    def __init__(self, coroutine: collections.abc.Coroutine):
-        self.coroutine = coroutine
-```
-
-### Event Loop (asyncio.base_events.BaseEventLoop)
-
-
-Most asyncio programs start something like so. And many other ways of invoking asyncio (like asyncio.run or asyncio.run_until_complete) largely 
-re-use the main components of this approach.
-
-```
-import asyncio
-
-async def def main():
-    ...
-
-if __name__ == "__main__":
-    loop = asyncio.new_event_loop()
-    loop.create_task(coro=main())
-    loop.run_forever()
-```
-
-The event-loop contains two queues each filled with Tasks: scheduled & ready. Tasks in the ready queue are ready to be invoked. Tasks
-in the scheduled queue are not. For now, we'll only consider the ready-queue. Here's what one pass through the event-loop looks like:
-1. Save the number of tasks currently in the ready-queue.
-2. Pop a Task from the ready-queue
-3. Invoke or resume the Task's coroutine. Run until the coroutine yields control back to the event-loop.
-4. Repeat from step 2. until you've run as many tasks as you saved in step 1. This is to prevent running tasks 
-    added to the event-loop on this iteration in this iteration. Not to worry, they'll be run next time!
-
-To invoke or resume a coroutine, you can call `coroutine.send(None)`. This will return execution to wherever the coroutine yield-ed
-and send along the provided value, in this case None. In other words, the event-loop surrenders control to the Task's coroutine 
-and counts on the coroutine to not hog resources and eventually yield control back. But how does a coroutine yield control back? Read on!
-
-
-### await
-
-Frankly, this part is really fucking confusing to me. I've tried to make it clear.
-
-You can only yield control back to the event-loop from a coroutine by awaiting a non coroutine-object that has a non-async generator method named `__await__`. I know that's a lot of jargon to digest, so here's an example in the hope it helps. Notably, awaiting a coroutine DOES NOT cede control to the event loop. 
-
-```
-class CustomAwaitable():
-    def __await__(self):
-        # This is a generator method rather than a plain method since it features a yield statemen in the body.
-        yield
-
-async def simple_print():
-    print("Hello. I am a simple_printer. My means are simple and my work is good.")
-
-async def main():
-    
-    custom_awaitable_obj = CustomAwaitable()
-    # This will yield control to the event-loop.
-    await custom_awaitable_obj
-
-    coroutine_obj = simple_print()
-    # This will NOT yield control to the event-loop.
-    await coroutine_obj
-
-...
-```
-
-### Wrapping it all together
-
-The Future class defines an `__await__` method (which Task inherits) that also `yield`'s. In practice you'll generally just await Future or Task objects but if you'd like to extend asyncio's available operators or better understand how it works, well that's it.
-
-await calls an object's __await__ method. I know, I know, that's a rather circular and not especially insightful answer. Only a few kinds of objects (or classes) have __await__ methods. Futures do.
-
-The implementation (Future.__await__) is seemingly simple and only a few lines of code. It does two important things. 
-First, it yields `yield self`, second, it returns `self.result`. The yield `self` call provides the object being awaited back to the 
-event-loop. The event-loop adds it to the queue. It also adds a note to invoke the now-paused coroutine once the awaited object is done 
-via Future.add_done_callback().
-
-...
 
 ### loop.scheduled
 
