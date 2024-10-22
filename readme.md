@@ -313,6 +313,32 @@ We'll analyze how control flows through this example program and the methods `Ta
     * The StopIteration exception is caught so we go to line 7. `func_task` is marked as done. So, the done-callbacks of `func_task` i.e. (`main_task.step`) are added to the event-loops' queue. The `step` method ends and returns control to the event-loop.
 1. **`event-loop`**
     * The event-loop cycles to the next task in its queue. The event-loop pops `main_task` and resumes it by calling `main_task.step()`.
+1. **`main_task.step`**
+    * We enter the try-block on line 4 then resume the coroutine `main` on line 5.
+1. **`program.main`** 
+    * The coroutine finishes and raises a StopIteration exception.
+1. **`main-task.step`** 
+    * The StopIteration exception is caught and `main_task` is marked as done. The `step` method end and returns control to the event-loop.
+1. **`event-loop`** 
+    * There's nothing in the queue. The event-loop cycles aimlessly onwards.
+
+Here's another way of visualizing that control-flow. 
+* event-loop
+    * main_task.step
+        * program.main
+            * func_task.\_\_await\_\_
+        * program.main
+    * main_task.step
+* event-loop
+    * func_task.step
+        * program.func
+    * func_task.step
+* event-loop
+    * main_task.step 
+        * program.main
+    * main_task.step
+* event-loop
+
 
 #### What does await do?
 
