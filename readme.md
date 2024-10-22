@@ -1,5 +1,14 @@
 # A conceptual overview of the ideas and objects which power Python's `asyncio`
 
+### Todo's
+
+- [ ] Understanding async generators
+- [ ] Add an async generators section (if necessary)
+- [ ] A fuller example w/ file I/O
+- [ ] Remaining details, e.g. 3 queues & select/events
+- [ ] Final read-through
+
+
 ## Motivation
 
 I've used `asyncio` a couple times now, but never really felt confident in my mental-model of how it works and how I can best use it. The official `asyncio` docs provide decent-enough documentation for each specific function in the package, but, in my opinion, lack a cohesive overview of the design and functionality to help the user make informed decisions about which tool in the `asyncio` tool-kit they ought to grab, or to recognize when `asyncio` is the entirely wrong tool-kit. This is my attempt to fill that gap. 
@@ -14,9 +23,9 @@ A few aspects particually drove my curiosity (read: drove me nuts). You should b
 
 ## Introduction
 
-The details of how asyncio works under the hood are fairly hairy and involved, so I offer two conceputal overviews. The first section titled Overview is meant to provide a sturdy mental model without getting into too many specifics of asyncio. The second titled "More of the nuts & bolts" gets into the nitty-gritty. If nitty-gritty is your jam, you're looking to more deeply understand what's going on or want to build your own operators on top of asyncio, I recommend starting with the first section and then proceeding through the second section. I've tried to ensure they don't repeat each other and instead build on each other.
+The details of how asyncio works under the hood are fairly hairy and involved, so I broke the conceputal overview into two parts. The first part is meant to provide a fairly sturdy and reliable mental model without getting into too many specifics of how they work. The second part goes deeper explaining the Python-language building blocks `asyncio` leverages and exploring simplified implementations of the key functions of `asyncio`. If you're looking to more deeply understand how asyncio does what it does, or want to build your own operators on top of asyncio, I highly recommend it!
 
-## Conceputal Overview
+## Conceputal Overview Part 1
 
 #### Event Loop
 
