@@ -289,29 +289,29 @@ We'll analyze how control flows through this example program and the methods `Ta
 10 loop.run_forever()
 ```
 
-* **`program`** 
+1. **`program`** 
     * Line 8 creates an event-loop, line 9 creates `main_task` and adds it to the event-loop, line 10 invokes the event-loop. 
-* **`event-loop`**
+1. **`event-loop`**
     * The event-loop pops `main_task` off the queue then invokes it by calling `main_task.step()`. 
-* **`main_task.step`**
+1. **`main_task.step`**
     * We enter the try-block on line 4 then begin the coroutine `main` on line 5. 
-* **`program.main`**
+1. **`program.main`**
     * It creates `func_task` on line 5 which also adds `func_task` to the event-loops' queue. Line 6 awaits `func_task`. 
-* **`func_task.__await__`**
+1. **`func_task.__await__`**
     * `func_task` is not done given it was just created, so we enter the first if-block on line 5. We set a flag on `func_task` on line 6, then yield `func_task` on line 7.
-* **`program.main`**
+1. **`program.main`**
     * `await` percolates the yield and the yielded value -- `func_task`.
-* **`main_task.step`**
+1. **`main_task.step`**
     * `result` is now `func_task`. No StopIteration was raised so the else in the try-block on line 8 executes. The attribute set on `func_task` informs us we should block `main_task` on it. A done-callback: `main_task.step` is added to the func_task.
-* **`event-loop`**
+1. **`event-loop`**
     * The event-loop cycles to the next task in its queue. The event-loop pops `func_task` from its queue and invokes it by calling `func_task.step()`.
-* **`func_task.step`**
+1. **`func_task.step`**
     * We enter the try-block on line 4 then begin the coroutine `func` on line 5. 
-* **`program.func`**
+1. **`program.func`**
     * Control goes to the coroutine `func` on line 2. It prints, then finishes and raises a StopIteration exception.
-* **`func_task.step`**
+1. **`func_task.step`**
     * The StopIteration exception is caught so we go to line 7. `func_task` is marked as done. So, the done-callbacks of `func_task` i.e. (`main_task.step`) are added to the event-loops' queue.
-* **`event-loop`**
+1. **`event-loop`**
     * The event-loop cycles to the next task in its queue. The event-loop pops `main_task` and resumes it by calling `main_task.step()`.
 
 #### What does await do?
