@@ -6,18 +6,20 @@
 - [ ] Add an async generators section (if necessary)
 - [ ] Review & rename the hypotheses.
 - [ ] A fuller example w/ file I/O
-- [ ] Remaining details, e.g. 3 queues & select/events
+- [ ] Remaining details -- e.g. 3 queues, select/events & async gens
+- [ ] Table of contents
 - [ ] Final read-through
+
 
 
 ## Motivation
 
-I've used `asyncio` a couple times now, but never really felt confident in my mental-model of how it works and how I can best use it. The official `asyncio` docs provide decent-enough documentation for each specific function in the package, but, in my opinion, lack a cohesive overview of the design and functionality to help the user make informed decisions about which tool in the `asyncio` tool-kit they ought to grab, or to recognize when `asyncio` is the entirely wrong tool-kit. This is my attempt to fill that gap. 
+I've used `asyncio` a couple times now, but never really felt confident in my mental-model of how it works and how I can best use it. The official `asyncio` docs provide pretty-decent documentation for each specific function in the package, but, in my opinion, lack a cohesive overview of the design and functionality to help the user make informed decisions about which tool in the `asyncio` tool-kit they ought to grab, or to recognize when `asyncio` is the entirely wrong tool-kit. This is my attempt to fill that gap. 
 
 There were a few blog-posts, stack-overflow discussons and other writings about `asyncio` that I found helpful, but didn't fully provide what I was looking for. I've linked them below.
 
 A few aspects particually drove my curiosity (read: drove me nuts). You should be able to answer all these questions by the end of this article.
-- What's roughly happening behind the scenes when various objects are `await`-ed? 
+- What's roughly happening behind the scenes when an objects is `await`-ed? 
 - How does `asyncio` differentiate between a task which doesn't need cpu-time to make progress towards completion (for example a network-request or file-read) as opposed to a task that does need cpu-time to make progress (for example, computing n-factorial). 
 - How does `asyncio.sleep()` run asynchronously while `time.sleep()` does not? 
 - How would I go about writing my own asynchronous variant of some operation (e.g. sleep, network-request, file-read, etc.)?
@@ -114,7 +116,7 @@ get_user_info = asyncio.Task(coro=get_user_info(), loop=event_loop)
 event_loop.run_forever()
 ```
 
-The underlying hardware responsible for performing the network request and placing the response-bytes into main-memory can run seperately from the CPU. That's all for nothing if we don't let the CPU something do something in the meantime.
+The underlying hardware responsible for performing the network request and placing the response-bytes into main-memory can run seperately from the CPU. Fundamentally, that is what enables or makes-possible the asynchronous behavior we desire. But, it's all for nothing if we don't let the CPU something do something in the meantime.
 
 In this case, we want to let the CPU focus on other activities after we call `db.get(user_id)`. Then, have the CPU come back once the networking hardware has done its' part.
 
@@ -274,6 +276,7 @@ The actual method that invokes a Tasks' coroutine: `asyncio.tasks.Task.__step_ru
 We'll analyze how control flows through this example program and the methods `Task.step` & `Future.__await__`.
 
 ```python
+# Filename: program.py
 1  async def func():
 2      print("I am func().")
 3
@@ -286,17 +289,18 @@ We'll analyze how control flows through this example program and the methods `Ta
 10 loop.run_forever()
 ```
 
-1. Line 8 creates an event-loop, line 9 creates `main_task` and adds it to the event-loop, line 10 invokes the event-loop.
-2. The event-loop pops `main_task` then invokes it by calling `main_task.step()`. We enter the try-block on line 4 then begin the
-coroutine `main` on line 5. 
-3. The coroutine `main` creates `func_task` on line 5 and adds it to the event-loop. Line 6 awaits `func_task`. First, 
-func_task.\_\_await\_\_ is called. `func_task` is not done given it was just created, so we enter the first if-block in Future.\_\_await\_\_ on line 5.
-`func_task` is yielded on line 6. Control briefly returns to coroutine `main` on line 6 which percolates
-the yield and `func_task` object back to the coro.send() on line 5 in `main_task.step()`. 
-4. `result` now equals `func_task` and `self` is `main_task`. No StopIteration was raised so the else in the try-block executes. The attribute set on `func_task` informs us we should block `main_task` on it. A done-callback: `main_task.step` is added to the func_task.
-5. The event-loop continues. It pops `func_task` and invokes it. Control goes to the coroutine `func` on line 2. It prints, then finishes and raises
-a StopIteration exception. The except in `func_task.step` catches it, and marks `func_task` as done. Finally, the done-callbacks of `func_task` i.e. (`main_task.step`) are added to the event-loops' queue.
-6. The event-loop continues. It pops `main_task` and resumes the coroutine on line 6. `main` raises a StopIteration exception, the `main_task` is marked as done, and the event-loop cycles ever onwards.
+1. We begin by invoking `python program.py`. Line 8 creates an event-loop, line 9 creates `main_task` and adds it to the event-loop, line 10 invokes the event-loop. 
+2. Control goes to the event-loop. The event-loop pops `main_task` off the queue then invokes it by calling `main_task.step()`. 
+3. Control goes to `Task.step` where self is `main_task`. We enter the try-block on line 4 then begin the coroutine `main` on line 5. 
+4. Control goes to the coroutine `main` in program.py. It creates `func_task` on line 5 which also adds `func_task` to the event-loops' queue. Line 6 awaits `func_task`. 
+5. Control goes to `Future.__await__` where self is `func_task`. `func_task` is not done given it was just created, so we enter the first if-block on line 5. We set a flag on `func_task` on line 6, then yield `func_task` on line 7.
+6. Control returns to the coroutine `main` in program.py. `await` percolates the yield and the yielded value (`func_task`).
+7. Control returns to `Task.step` where self is `main_task` on line 5. And `result` is now `func_task`. No StopIteration was raised so the else in the try-block on line 8 executes. The attribute set on `func_task` informs us we should block `main_task` on it. A done-callback: `main_task.step` is added to the func_task.
+8. Control remains in the event-loop and it cycles to the next task in its queue. The event-loop pops `func_task` from its queue and invokes it by calling `func_task.step()`.
+9. Control goes to `Task.step` where self is `func_task`. We enter the try-block on line 4 then begin the coroutine `func` on line 5. 
+10. Control goes to the coroutine `func` on line 2. It prints, then finishes and raises a StopIteration exception.
+11. Control goes back to `Task.step` where self is `func_task`. The StopIteration exception is caught so we go to line 7. `func_task` is marked as done. So, the done-callbacks of `func_task` i.e. (`main_task.step`) are added to the event-loops' queue.
+12. Control remains in the event-loop and it cycles to the next task in its queue. The event-loop pops `main_task` and resumes it by calling `main_task.step()`.
 
 #### What does await do?
 
