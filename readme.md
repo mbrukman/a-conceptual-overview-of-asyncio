@@ -34,7 +34,7 @@ The details of how asyncio works under the hood are fairly hairy and involved, s
 
 Everything in asyncio happens relative to the event-loop. It's the star of the show and there's only one. It's kind of like an orchestra conductor or military general. She's behind the scenes managing resources. Some power is explicitly granted to her, but a lot of her ability to get things done comes from the respect & cooperation of her subordinates.
 
-In more technical terms, the event-loop contains a queue of Tasks to be run. Some Tasks are added directly by you, and some indirectly by asyncio. The event-loop pops a Task from the queue and invokes it (or gives it control), similar to a context-switch or calling a function. That Task then runs. Once it pauses or completes, it returns control to the event-loop. The event-loop then pops and invokes the next Task in its' queue. This process repeats indefinitely. Even if the queue is empty, the event-loop continues to cycle (somewhat aimlessly).
+In more technical terms, the event-loop contains a queue of Tasks to be run. Some Tasks are added directly by you, and some indirectly by asyncio. The event-loop pops a Task from the queue and invokes it (or gives it control), similar to calling a function. That Task then runs. Once it pauses or completes, it returns control to the event-loop. The event-loop then pops and invokes the next Task in its' queue. This process repeats indefinitely. Even if the queue is empty, the event-loop continues to cycle (somewhat aimlessly).
 
 Effective overall execution relies on Tasks sharing well. A greedy task could hog control and leave the other tasks to starve rendering the overall event-loop approach rather useless. 
 
@@ -103,7 +103,7 @@ super_special_task = asyncio.Task(coro=super_special_func(x=5))
 
 #### Network I/O Example
 
-Performing a database request across a network might take half a second or so, and that's ages in computer-time. Your processor could have done millions or even billions of things. The same is true for say downloading a movie, requesting a website, loading a file from disk into memory, etc. The general theme is those are all input/output (I/O) actions.
+Performing a database request across a network might take half a second or so, and that's ages in computer-time. Your processor could have done millions or even billions of things. The same is true for, say, downloading a movie, requesting a website, loading a file from disk into memory, etc. The general theme is those are all input/output (I/O) actions.
 
 ```python
 async def get_user_info(user_id: uuid.UUID):
@@ -269,8 +269,7 @@ The actual method that invokes a Tasks' coroutine: `asyncio.tasks.Task.__step_ru
 9              if result._asyncio_is_future_blocking is True:
 10                 result._asyncio_is_future_blocking = False
 11                 result.add_done_callback(self.__step)
-12             elif result is None:
-13                 self._loop.call_soon(self.__step)
+12             ...
 ```
 
 We'll analyze how control flows through this example program and the methods `Task.step` & `Future.__await__`.
@@ -348,6 +347,58 @@ Here's another way of visualizing that control-flow.
 
 #### How does the event-loop know when the thing I'm waiting for is done (and whether it needs cpu-time to get there)?
 
+## Appendix
+
+#### Asychronous generators
+
+Asynchronous-generators or coroutine-generators are generators that yield coroutines. 
+
+``` python
+# This is a coroutine-generator-function. Calling it 
+# produces a coroutine-generator.
+async def coroutine_generator_func():
+    
+    # This yield statement represents the end-point 
+    # of the first awaited-coroutine that this 
+    # generator-coroutine will produce. It implicitly
+    # raises a StopIteration exception.
+    yield 1
+    
+    # The second returned coroutine will begin just after
+    # the prior-yield. And end at the following yield 
+    # below. Again, the yield will raise a StopIteration 
+    # exception.
+    yield 2
+
+    # The third returned coroutine will follow a similar
+    # pattern.
+    yield 3
+
+# For review, this is a coroutine-function. Calling it 
+# produces a coroutine.
+async def coroutine_func():
+    await other_coroutine
+    return
+```
+
+I believe they're meant to be useful for situations like this. 
+
+```python
+async def read_file_in_chunks(file):
+    while chunk != EOF
+        chunk = await read_file_chunk(file)
+        yield chunk
+
+async for chunk in read_file_in_chunks(file):
+    ...
+```
+
+Personally, I find coroutine-generators a bit redundant, questionably useful & rather confusing. They're meant to serve as iterators and save boilerplate by implementing \_\_aiter\_\_ and \_\_anext\_\_ (the asynchronous analogues of \_\_next\_\_ and \_\_iter\_\_). I couldn't find any meaningful online articles about them, besides the [Python Enhancement Proposal (PEP)](https://peps.python.org/pep-0525/) which introduced them.
+
+I don't see why plain-coroutines can't fill the iterator role given they can already pause & yield values. Why not allow plain-coroutines to `yield` in their body and add an \_\_anext\_\_ method to the parent-class which just returns the coroutine. To iterate over the coroutine and receive values you just repeatedly await or .send on it. 
+
+Though, take this with a grain of salt, there's a decent chance I'm missing something! If you know that something, please let me know!
+
 
 Tasks
 Async Functions & Coroutines
@@ -364,7 +415,7 @@ Things to Remember
 A good overview of the fundamental Python language features asyncio uses. 
 https://stackoverflow.com/questions/49005651/how-does-asyncio-actually-work
 
-Great context and basic-intro to asyncio. In my experience, Real Python is generally excellent quality.
+Good context and basic-intro to asyncio. In my experience, Real Python is generally excellent quality.
 https://realpython.com/async-io-python/
 
 I only skimmed this, but I found the example program at the end very useful to pull apart.
