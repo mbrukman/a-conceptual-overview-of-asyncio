@@ -2,8 +2,8 @@
 
 ### Todo's
 
-- [ ] Understanding async generators
-- [ ] Add an async generators section (if necessary)
+- [x] Understanding async generators (kind-of lol)
+- [x] Add an async generators section (if necessary)
 - [ ] Review & rename the hypotheses.
 - [ ] A fuller example w/ file I/O
 - [ ] Remaining details -- e.g. 3 queues, select/events & async gens
