@@ -253,7 +253,7 @@ async def main():
     await Task(coro=simple_func())
 ```
 
-#### Tying it all together
+#### Analyzing an example programs control flow
 
 The actual method that invokes a Tasks' coroutine: `asyncio.tasks.Task.__step_run_and_handle_result` is about 80 lines long. For the sake of clarity, I've removed all of the edge-case error-handling, simplified some aspects and renamed it, but the core logic remains unchanged.
 
@@ -272,7 +272,7 @@ The actual method that invokes a Tasks' coroutine: `asyncio.tasks.Task.__step_ru
 12             ...
 ```
 
-We'll analyze how control flows through this example program and the methods `Task.step` & `Future.__await__`.
+We'll analyze how control flows through this example program: `program.py` and the methods `Task.step` & `Future.__await__`.
 
 ```python
 # Filename: program.py
@@ -288,56 +288,57 @@ We'll analyze how control flows through this example program and the methods `Ta
 10 loop.run_forever()
 ```
 
-1. **`program`** 
+1. Control begins in **`program.py`** 
     * Line 8 creates an event-loop, line 9 creates `main_task` and adds it to the event-loop, line 10 invokes the event-loop. 
-1. **`event-loop`**
+1. Control is now in the **`event-loop`**
     * The event-loop pops `main_task` off the queue then invokes it by calling `main_task.step()`. 
-1. **`main_task.step`**
+1. Control is now in **`main_task.step`**
     * We enter the try-block on line 4 then begin the coroutine `main` on line 5. 
-1. **`program.main`**
+1. Control is now in **`program.main`**
     * It creates `func_task` on line 5 which also adds `func_task` to the event-loops' queue. Line 6 awaits `func_task`. 
-1. **`func_task.__await__`**
+1. Control is now in **`func_task.__await__`**
     * `func_task` is not done given it was just created, so we enter the first if-block on line 5. We set a flag on `func_task` on line 6, then yield `func_task` on line 7.
-1. **`program.main`**
+1. Control is now in **`program.main`**
     * `await` percolates the yield and the yielded value -- `func_task`.
-1. **`main_task.step`**
+1. Control is now in **`main_task.step`**
     * `result` is now `func_task`. No StopIteration was raised so the else in the try-block on line 8 executes. The attribute set on `func_task` informs us we should block `main_task` on it. A done-callback: `main_task.step` is added to the func_task. The `step` method ends and returns to the event-loop.
-1. **`event-loop`**
+1. Control is now in the **`event-loop`**
     * The event-loop cycles to the next task in its queue. The event-loop pops `func_task` from its queue and invokes it by calling `func_task.step()`.
-1. **`func_task.step`**
+1. Control is now in **`func_task.step`**
     * We enter the try-block on line 4 then begin the coroutine `func` on line 5. 
-1. **`program.func`**
+1. Control is now in **`program.func`**
     * Control goes to the coroutine `func` on line 2. It prints, then finishes and raises a StopIteration exception.
-1. **`func_task.step`**
+1. Control is now in **`func_task.step`**
     * The StopIteration exception is caught so we go to line 7. `func_task` is marked as done. So, the done-callbacks of `func_task` i.e. (`main_task.step`) are added to the event-loops' queue. The `step` method ends and returns control to the event-loop.
-1. **`event-loop`**
+1. Control is now in the **`event-loop`**
     * The event-loop cycles to the next task in its queue. The event-loop pops `main_task` and resumes it by calling `main_task.step()`.
-1. **`main_task.step`**
+1. Control is now in **`main_task.step`**
     * We enter the try-block on line 4 then resume the coroutine `main` on line 5.
-1. **`program.main`** 
+1. Control is now in **`program.main`** 
     * The coroutine finishes and raises a StopIteration exception.
-1. **`main-task.step`** 
+1. Control is now in **`main-task.step`** 
     * The StopIteration exception is caught and `main_task` is marked as done. The `step` method end and returns control to the event-loop.
-1. **`event-loop`** 
+1. Control is now in the **`event-loop`** 
     * There's nothing in the queue. The event-loop cycles aimlessly onwards.
 
-Here's another way of visualizing that control-flow. 
-* event-loop
-    * main_task.step
-        * program.main
-            * func_task.\_\_await\_\_
-        * program.main
-    * main_task.step
-* event-loop
-    * func_task.step
-        * program.func
-    * func_task.step
-* event-loop
-    * main_task.step 
-        * program.main
-    * main_task.step
-* event-loop
-
+Here's another way of writing out that control-flow. 
+```
+event-loop
+    main_task.step
+        program.main
+            func_task.__await__
+        program.main
+    main_task.step
+event-loop
+    func_task.step
+        program.func
+    func_task.step
+event-loop
+    main_task.step 
+        program.main
+    main_task.step
+event-loop
+```
 
 #### What does await do?
 
@@ -395,9 +396,9 @@ async for chunk in read_file_in_chunks(file):
 
 Personally, I find coroutine-generators a bit redundant, questionably useful & rather confusing. They're meant to serve as iterators and save boilerplate by implementing \_\_aiter\_\_ and \_\_anext\_\_ (the asynchronous analogues of \_\_next\_\_ and \_\_iter\_\_). I couldn't find any meaningful online articles about them, besides the [Python Enhancement Proposal (PEP)](https://peps.python.org/pep-0525/) which introduced them.
 
-I don't see why plain-coroutines can't fill the iterator role given they can already pause & yield values. Why not allow plain-coroutines to `yield` in their body and add an \_\_anext\_\_ method to the parent-class which just returns the coroutine. To iterate over the coroutine and receive values you just repeatedly await or .send on it. 
+I don't see why plain-coroutines can't fill the iterator role given they can already pause & yield values. Why not allow plain-coroutines to yield in their body and add an \_\_anext\_\_ method to the parent-class which just returns the coroutine. To iterate over the coroutine and receive values you just repeatedly await or .send on it. 
 
-Though, take this with a grain of salt, there's a decent chance I'm missing something! If you know that something, please let me know!
+Though, take this tirade with a grain of salt; there's a decent chance I'm missing something! If you know that something, please let me know!
 
 
 Tasks
