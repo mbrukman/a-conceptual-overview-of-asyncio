@@ -128,6 +128,8 @@ Each time the event-loop iterates over its' queue of tasks, the watcher-task wil
 
 #### coroutine.send(), await, yield & StopIteration
 
+`asyncio` leverages these 4 components to pass around control.
+
 `coroutine.send(arg)` is the fundamental method used to start or resume a coroutine. 
 
 If the coroutine was paused and is now being resumed, the argument `arg` will be sent in as the return-value of the `yield` statement which originally paused it. When starting a coroutine, or when there's no value to send in, you can use `coroutine.send(None)`. The code snippet below illustrates both ways of using `coroutine.send(arg)`.
@@ -181,8 +183,8 @@ Coroutine finished and provided value: 23.
 ```
 
 The only way to yield (or effectively cede control) from a coroutine is to `await` an object that `yield`s in its `__await__` method. That might sound odd to you. Frankly, it was to me too. 
-1. What about a `yield` directly within the coroutine? The coroutine becomes a generator-coroutine, a different beast entirely.
-2. What about a `yield from` within the coroutine to a function that `yield`s (i.e. plain generator)? SyntaxError: `yield from` not allowed in a coroutine. 
+1. What about a `yield` directly within the coroutine? The coroutine becomes a generator-coroutine, a different beast entirely. I address generator-coroutines in the Appendix if you're curious.
+2. What about a `yield from` within the coroutine to a function that `yield`s (i.e. plain generator)? SyntaxError: `yield from` not allowed in a coroutine. I believe Python made this a SyntaxError to mandate only one way of using coroutines for the sake of simplicity. Ideologically, `yield from` and `await` are very similar.
 
 #### Futures
 
@@ -262,13 +264,13 @@ The actual method that invokes a Tasks' coroutine: `asyncio.tasks.Task.__step_ru
 2  ...
 3      def step(self):
 4          try:
-5              result = self.coro.send(None)
+5              yielded_value = self.coro.send(None)
 6          except StopIteration as e:
 7              super().set_result(e.value)
 8          else:
-9              if result._asyncio_is_future_blocking is True:
-10                 result._asyncio_is_future_blocking = False
-11                 result.add_done_callback(self.__step)
+9              if yielded_value._asyncio_is_future_blocking is True:
+10                 yielded_value._asyncio_is_future_blocking = False
+11                 yielded_value.add_done_callback(self.__step)
 12             ...
 ```
 
@@ -276,40 +278,41 @@ We'll analyze how control flows through this example program: `program.py` and t
 
 ```python
 # Filename: program.py
-1  async def func():
-2      print("I am func().")
+1  async def triple(val: int):
+2      return val * 3
 3
 4  async def main():
-5      func_task = asyncio.Task(coro=func())
-6      await func_task
-7
-8  loop = asyncio.new_event_loop()
-9  main_task = asyncio.Task(main(), loop=loop)
-10 loop.run_forever()
+5      triple_task = asyncio.Task(coro=triple(val=5))
+6      tripled_val = await triple_task
+7      return tripled_val + 2
+8
+9  loop = asyncio.new_event_loop()
+10  main_task = asyncio.Task(main(), loop=loop)
+11 loop.run_forever()
 ```
 
 1. Control begins in **`program.py`** 
-    * Line 8 creates an event-loop, line 9 creates `main_task` and adds it to the event-loop, line 10 invokes the event-loop. 
+    * Line 9 creates an event-loop, line 10 creates `main_task` and adds it to the event-loop, line 11 invokes the event-loop. 
 1. Control is now in the **`event-loop`**
     * The event-loop pops `main_task` off the queue then invokes it by calling `main_task.step()`. 
 1. Control is now in **`main_task.step`**
     * We enter the try-block on line 4 then begin the coroutine `main` on line 5. 
 1. Control is now in **`program.main`**
-    * It creates `func_task` on line 5 which also adds `func_task` to the event-loops' queue. Line 6 awaits `func_task`. 
-1. Control is now in **`func_task.__await__`**
-    * `func_task` is not done given it was just created, so we enter the first if-block on line 5. We set a flag on `func_task` on line 6, then yield `func_task` on line 7.
+    * It creates `triple_task` on line 5 which also adds `triple_task` to the event-loops' queue. Line 6 awaits `triple_task`. Recall, that calls `__await__` then percolates and yields.
+1. Control is now in **`triple_task.__await__`**
+    * `triple_task` is not done given it was just created, so we enter the first if-block on line 5. We set a flag on `triple_task` on line 6, then yield `triple_task` on line 7.
 1. Control is now in **`program.main`**
-    * `await` percolates the yield and the yielded value -- `func_task`.
+    * `await` percolates the yield and the yielded value -- `triple_task`.
 1. Control is now in **`main_task.step`**
-    * `result` is now `func_task`. No StopIteration was raised so the else in the try-block on line 8 executes. The attribute set on `func_task` informs us we should block `main_task` on it. A done-callback: `main_task.step` is added to the func_task. The `step` method ends and returns to the event-loop.
+    * `yielded_value` is now `triple_task`. No StopIteration was raised so the else in the try-block on line 8 executes. The attribute set on `triple_task` informs us we should block `main_task` on it. A done-callback: `main_task.step` is added to the `triple_task`. The `step` method ends and returns to the event-loop.
 1. Control is now in the **`event-loop`**
-    * The event-loop cycles to the next task in its queue. The event-loop pops `func_task` from its queue and invokes it by calling `func_task.step()`.
-1. Control is now in **`func_task.step`**
-    * We enter the try-block on line 4 then begin the coroutine `func` on line 5. 
-1. Control is now in **`program.func`**
-    * Control goes to the coroutine `func` on line 2. It prints, then finishes and raises a StopIteration exception.
-1. Control is now in **`func_task.step`**
-    * The StopIteration exception is caught so we go to line 7. `func_task` is marked as done. So, the done-callbacks of `func_task` i.e. (`main_task.step`) are added to the event-loops' queue. The `step` method ends and returns control to the event-loop.
+    * The event-loop cycles to the next task in its queue. The event-loop pops `triple_task` from its queue and invokes it by calling `triple_task.step()`.
+1. Control is now in **`triple_task.step`**
+    * We enter the try-block on line 4 then begin the coroutine `triple` on line 5. 
+1. Control is now in **`program.triple`**
+    * Control goes to the coroutine `triple` on line 2. It computes 3 times 5, then finishes and raises a StopIteration exception.
+1. Control is now in **`triple_task.step`**
+    * The StopIteration exception is caught so we go to line 7. The return value of the coroutine `main` is embedded in the `value` attribute of that exception. That result is saved to `triple_task` and `triple_task` is marked as done. The done-callbacks of `triple_task` i.e. (`main_task.step`) are added to the event-loops' queue. The `step` method ends and returns control to the event-loop.
 1. Control is now in the **`event-loop`**
     * The event-loop cycles to the next task in its queue. The event-loop pops `main_task` and resumes it by calling `main_task.step()`.
 1. Control is now in **`main_task.step`**
@@ -323,21 +326,22 @@ We'll analyze how control flows through this example program: `program.py` and t
 
 Here's another way of writing out that control-flow. 
 ```
-event-loop
-    main_task.step
-        program.main
-            func_task.__await__
-        program.main
-    main_task.step
-event-loop
-    func_task.step
-        program.func
-    func_task.step
-event-loop
-    main_task.step 
-        program.main
-    main_task.step
-event-loop
+program
+    event-loop
+        main_task.step
+            program.main
+                func_task.__await__
+            program.main
+        main_task.step
+    event-loop
+        func_task.step
+            program.func
+        func_task.step
+    event-loop
+        main_task.step 
+            program.main
+        main_task.step
+    event-loop
 ```
 
 #### What does await do?
