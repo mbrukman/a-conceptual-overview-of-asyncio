@@ -401,7 +401,7 @@ Personally, I find coroutine-generators a bit redundant, questionably useful & r
 
 I don't see why plain-coroutines can't fill the iterator role given they can already pause & yield values. Why not allow plain-coroutines to yield in their body and add an \_\_anext\_\_ method to the parent-class which just returns the coroutine. To iterate over the coroutine and receive values you just repeatedly await or .send on it. 
 
-Though, take this tirade with a grain of salt; there's a decent chance I'm missing something! If you know that something, please let me know!
+Though, take my perspective with a grain (or many grains) of salt; there's a decent chance I'm missing something! If you know that something, please let me know!
 
 
 Tasks
