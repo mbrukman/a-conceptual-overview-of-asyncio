@@ -24,7 +24,7 @@ A few aspects particually drove my curiosity (read: drove me nuts). You should b
 - How does `asyncio.sleep()` run asynchronously while `time.sleep()` does not? 
 - How would I go about writing my own asynchronous variant of some operation (e.g. sleep, network-request, file-read, etc.)?
 
-## Conceputal Overview Part 1: a mental model
+## Conceputal Overview Part 1: A Mental Model
 
 #### Event Loop
 
@@ -120,7 +120,7 @@ To accomplish that we'll cede control from our coroutine to the event-loop after
 
 Each time the event-loop iterates over its' queue of tasks, the watcher-task will be run and check how the db-request is getting along. After say 6 cycles through the event-loop, the watcher-task finally sees that the db-request has completed. So, it grabs the result of that request, and adds another Task to the queue to resume the `get_user_info` coroutine with the db-request result. 
 
-## Conceputal Overview Part 2: the nuts & bolts
+## Conceputal Overview Part 2: The Nuts & Bolts
 
 #### coroutine.send(), await, yield & StopIteration
 
