@@ -8,7 +8,8 @@ Experiment
 Result
     awaiting a Task allowed the other Task to run! That is, awaiting a Task did in fact
     cede control to the event-loop. awaiting a coroutine did not allow the task to run. 
-    Perhaps the coroutine just got lucky and was scheduled first?
+    
+Perhaps the coroutine just got lucky and kept getting scheduled first over the Task?
 
 Hypothesis
     awaiting a coroutine does not cede control to the event-loop.
@@ -17,7 +18,7 @@ Experiment
 Result
     await coroutine does not go to any asyncio library code, it instead goes 
     straight to the coroutine's logic/body, whereas await task did jump to some 
-    asyncio code -- notably call_soon. 
+    asyncio library code.
 """
 
 """
@@ -32,8 +33,8 @@ import datetime
 
 
 async def factorial(n: int):
-    """Iteratively compute n factorial. For n=75,000 this takes about 2
-    seconds to run on my machine -- an M1 Macbook Air with 16GB Ram.
+    """Iteratively compute n factorial. For n=50,000 this takes about 1
+    second to run on my machine -- an M1 Macbook Air with 16GB Ram.
     """
     print(f"Computing factorial(n={n:,}) at time: {datetime.datetime.now()}")
     multiplicative_total = 1
@@ -51,14 +52,19 @@ async def simple_print():
 async def main():
     
     print_task = asyncio.Task(simple_print())
-    num_factorials_to_compute = 5
+    num_factorials_to_compute = 15
     
     for _ in range(num_factorials_to_compute):
-        # Toggle between commenting the following two-lines to see how awaiting a coroutine
-        # and awaiting a Task change the script's overall behavior.
         
-        await factorial(n=75_000)
-        # await asyncio.Task(factorial(n=75_000))
+        # Toggle between commenting the following two-lines (Task vs coroutine) to see 
+        # how awaiting a coroutine and awaiting a Task change the script's overall 
+        # behavior.
+        # Alternatively, uncomment the set_trace() to follow the flow with a debugger.
+        
+        # import ipdb; ipdb.set_trace()
+        
+        await factorial(n=50_000)
+        # await asyncio.Task(factorial(n=50_000))
 
     await print_task
 
