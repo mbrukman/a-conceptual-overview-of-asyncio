@@ -24,11 +24,7 @@ A few aspects particually drove my curiosity (read: drove me nuts). You should b
 - How does `asyncio.sleep()` run asynchronously while `time.sleep()` does not? 
 - How would I go about writing my own asynchronous variant of some operation (e.g. sleep, network-request, file-read, etc.)?
 
-## Introduction
-
-The details of how asyncio works under the hood are fairly hairy and involved, so I broke the conceputal overview into two parts. The first part is meant to provide a fairly sturdy and reliable mental model without getting into too many specifics of how they work. The second part goes deeper explaining the Python-language building blocks `asyncio` leverages and exploring simplified implementations of the key functions of `asyncio`. If you're looking to more deeply understand how asyncio does what it does, or want to build your own operators on top of asyncio, I highly recommend it!
-
-## Conceputal Overview Part 1
+## Conceputal Overview Part 1: a mental model
 
 #### Event Loop
 
