@@ -316,11 +316,14 @@ We'll analyze how control flows through this example program: `program.py` and t
 1. Control is now in the **`event-loop`**
     * The event-loop cycles to the next task in its queue. The event-loop pops `main_task` and resumes it by calling `main_task.step()`.
 1. Control is now in **`main_task.step`**
-    * We enter the try-block on line 4 then resume the coroutine `main` on line 5.
+    * We enter the try-block on line 4 then resume the coroutine `main` from where it yielded.
+1. Control is now in **`triple_task.__await__`**
+    * We evaluate the if-statement on line 9 which ensures that `triple_task` is completed. Then, it returns the `result` of `triple_task` which was saved earlier. Finally that `result`
+    is returned to the caller (i.e. `... = await triple_task`).
 1. Control is now in **`program.main`** 
-    * The coroutine finishes and raises a StopIteration exception.
+    * `tripled_val` is now 15. The coroutine finishes and raises a StopIteration exception with the return value of 17 attached.
 1. Control is now in **`main-task.step`** 
-    * The StopIteration exception is caught and `main_task` is marked as done. The `step` method end and returns control to the event-loop.
+    * The StopIteration exception is caught and `main_task` is marked as done and its result is saved. The `step` method end and returns control to the event-loop.
 1. Control is now in the **`event-loop`** 
     * There's nothing in the queue. The event-loop cycles aimlessly onwards.
 

@@ -26,12 +26,12 @@ async def main():
     simple_coroutine = simple_func()
     
     # Coroutine-test.
-    # await simple_coroutine
-    # simple_coroutine.__await__()
+    await simple_coroutine
+    # await simple_coroutine.__await__()
 
     # Task-test.
-    simple_task = asyncio.Task(simple_coroutine)
-    await simple_task
+    # simple_task = asyncio.Task(simple_coroutine)
+    # await simple_task
     # simple_task.__await__()
 
 loop = asyncio.new_event_loop()
