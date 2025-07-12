@@ -27,4 +27,4 @@ total = uniform_sum(n_samples=int(1.2e8))
 print(f"====== Done uniform_sum. total: {total:.2f}. Ran for: {time.time() - start_time:.2f}s. ======")
 
 
-print(f"Total time elapsed: {time.time() - global_start_time:.2f} seconds.")
+print(f"Total time elapsed: {time.time() - global_start_time:.2f}s.")

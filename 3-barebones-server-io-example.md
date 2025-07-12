@@ -21,38 +21,50 @@ Beginning server_request.
 ====== Done server_request. total: -98.57. Ran for: 2.79s. ======
 Beginning uniform_sum.
 ====== Done uniform_sum. total: 59996185.06. Ran for: 4.75s. ======
-Total time elapsed: 7.54 seconds.
+Total time elapsed: 7.54s.
 ```
 
 #### Asynchronous output
 ```bash
-$ python async_approach.py
+ $ p async_approach.py
 Beginning uniform_sum.
-Pausing uniform_sum at: 26,999,999. time_elapsed: 1.03s.
+Pausing uniform_sum at: 26,999,999. time_elapsed: 1.04s.
 
 Beginning server_request.
-Pausing server_request.
+Pausing server_request. time_elapsed: 0.00s.
 
 Resuming uniform_sum.
 Pausing uniform_sum at: 53,999,999. time_elapsed: 1.05s.
 
 Resuming server_request.
-Pausing server_request.
+Pausing server_request. time_elapsed: 0.00s.
 
 Resuming uniform_sum.
-Pausing uniform_sum at: 80,999,999. time_elapsed: 1.06s.
+Pausing uniform_sum at: 80,999,999. time_elapsed: 1.05s.
 
 Resuming server_request.
-Pausing server_request.
+Pausing server_request. time_elapsed: 0.00s.
 
 Resuming uniform_sum.
-Pausing uniform_sum at: 107,999,999. time_elapsed: 1.05s.
+Pausing uniform_sum at: 107,999,999. time_elapsed: 1.04s.
 
 Resuming server_request.
-====== Done server_request. total: -2542.28. ======
+====== Done server_request. total: 3242.14. ======
 
 Resuming uniform_sum.
-====== Done uniform_sum. total: 59999986.44 ======
+====== Done uniform_sum. total: 60002169.76 ======
 
-Total time elapsed: 4.65s.
+Total time elapsed: 4.64s.
 ```
+
+#### Serial script
+
+https://github.com/anordin95/a-conceptual-overview-of-asyncio/blob/f76dd13a34a1a9bcc5a6467f922adb9c76ef6673/server-compute-example/serial_approach.py#L1-L30
+
+#### Asynchronous script
+
+https://github.com/anordin95/a-conceptual-overview-of-asyncio/blob/f76dd13a34a1a9bcc5a6467f922adb9c76ef6673/server-compute-example/async_approach.py#L1-L78
+
+#### Server code
+
+https://github.com/anordin95/a-conceptual-overview-of-asyncio/blob/f76dd13a34a1a9bcc5a6467f922adb9c76ef6673/server-compute-example/server.py#L1-L29

@@ -45,7 +45,8 @@ async def uniform_sum(n_samples: int, time_allotment: float) -> float:
 
 async def server_request() -> float:
     print(f"Beginning server_request.")
-
+    
+    start_time = time.time()
     client = socket.socket()
     client.connect(server.SERVER_ADDRESS)
     client.setblocking(False)
@@ -55,9 +56,10 @@ async def server_request() -> float:
             response = client.recv(4096)
             break
         except BlockingIOError:
-            print(f"Pausing server_request.\n")
+            print(f"Pausing server_request. time_elapsed: {time.time() - start_time:.2f}s.\n")
             await YieldToEventLoop()
             print(f"Resuming server_request.")
+            start_time = time.time()
 
     print(f"====== Done server_request. total: {float(response.decode()):.2f}. ====== \n")
 
