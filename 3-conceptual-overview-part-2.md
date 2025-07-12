@@ -2,7 +2,7 @@
 
 #### coroutine.send(), await, yield & StopIteration
 
-`asyncio` leverages these 4 components to pass around control.
+`asyncio` leverages those 4 components to pass around control.
 
 `coroutine.send(arg)` is the fundamental method used to start or resume a coroutine. 
 

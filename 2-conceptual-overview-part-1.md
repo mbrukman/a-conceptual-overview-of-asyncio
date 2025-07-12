@@ -73,7 +73,7 @@ super_special_task = asyncio.Task(coro=super_special_func(x=5))
 
 #### Network I/O Example
 
-Performing a database request across a network might take half a second or so, and that's ages in computer-time. Your processor could have done millions or even billions of things. The same is true for, say, downloading a movie, requesting a website, loading a file from disk into memory, etc. The general theme is those are all input/output (I/O) actions.
+Performing a database request across a network might take half a second or so, and that's ages in computer-time. Your processor could have done millions or even billions of things. The same is true for, say, requesting a website, downloading a car, loading a file from disk into memory, etc. The general theme is those are all input/output (I/O) actions.
 
 ```python
 async def get_user_info(user_id: uuid.UUID):
