@@ -11,7 +11,6 @@ def uniform_sum(n_samples: int) -> float:
     
     return total
 
-
 # Request and wait for server to perform a computation.
 start_time = time.time()
 global_start_time = start_time

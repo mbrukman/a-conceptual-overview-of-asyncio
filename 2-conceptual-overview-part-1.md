@@ -71,25 +71,3 @@ It's common to see a Task instantiated without explicitly specifying the event-l
 super_special_task = asyncio.Task(coro=super_special_func(x=5))
 ```
 
-#### Network I/O Example
-
-Performing a database request across a network might take half a second or so, and that's ages in computer-time. Your processor could have done millions or even billions of things. The same is true for, say, requesting a website, downloading a car, loading a file from disk into memory, etc. The general theme is those are all input/output (I/O) actions.
-
-```python
-async def get_user_info(user_id: uuid.UUID):
-    # Request the user's information from the database.
-    user_info = db.get(user_id)
-    return user_info
-
-event_loop = asyncio.new_event_loop()
-get_user_info = asyncio.Task(coro=get_user_info(), loop=event_loop)
-event_loop.run_forever()
-```
-
-The underlying hardware responsible for performing the network request and placing the response-bytes into main-memory can run seperately from the CPU. Fundamentally, that is what enables or makes-possible the asynchronous behavior we desire. But, it's all for nothing if we don't let the CPU something do something in the meantime.
-
-In this case, we want to let the CPU focus on other activities after we call `db.get(user_id)`. Then, have the CPU come back once the networking hardware has done its' part.
-
-To accomplish that we'll cede control from our coroutine to the event-loop after calling `db.get(user_id)`. The event-loop then creates a new Task, that we'll refer to as a watcher-task (though that's not official lingo by any means), with some important responsibilities. That watcher-task will check on the db-request to see if it's done. And it'll keep note of how to resume the `get_user_info` coroutine from where it was paused.
-
-Each time the event-loop iterates over its' queue of tasks, the watcher-task will be run and check how the db-request is getting along. After say 6 cycles through the event-loop, the watcher-task finally sees that the db-request has completed. So, it grabs the result of that request, and adds another Task to the queue to resume the `get_user_info` coroutine with the db-request result. 
