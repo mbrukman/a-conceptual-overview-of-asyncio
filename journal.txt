@@ -1,0 +1,17 @@
+- I don't understand why await was designed to only call __await__. Surely there's a better design?
+Perhaps one where await directly cedes to the event-loop. Nothing else. Though, how to passs values back in such a scheme?
+
+- Add a glossary for finnicky terms like async & await describing exactly what they mean/do.
+
+- I'm leaving TODO's in places where I need to manually address certain aspects.
+
+- Review each hypothesis and simplify where possible.
+- 1
+- 2
+- 3
+- 4
+- 5
+- 6
+- 7
+- 8 
+- 9

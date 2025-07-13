@@ -59,12 +59,12 @@ Total time elapsed: 4.64s.
 
 #### Serial script
 
-https://github.com/anordin95/a-conceptual-overview-of-asyncio/blob/f76dd13a34a1a9bcc5a6467f922adb9c76ef6673/server-compute-example/serial_approach.py#L1-L30
+TODO: Paste serial script here.
 
 #### Asynchronous script
 
-https://github.com/anordin95/a-conceptual-overview-of-asyncio/blob/f76dd13a34a1a9bcc5a6467f922adb9c76ef6673/server-compute-example/async_approach.py#L1-L78
+TODO: Paste async script here.
 
 #### Server code
 
-https://github.com/anordin95/a-conceptual-overview-of-asyncio/blob/f76dd13a34a1a9bcc5a6467f922adb9c76ef6673/server-compute-example/server.py#L1-L29
+TODO: Paste server code here.
