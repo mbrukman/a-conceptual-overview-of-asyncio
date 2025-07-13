@@ -88,14 +88,9 @@ Unfortunately, it actually does matter which type of object await is applied to.
 await-ing a coroutine will immediately invoke that coroutine. Control will never be ceded 
 to the event-loop. The behavior is effectively the exact same as calling a regular function.
 
-await-ing a task (or future or any other object) is different. I recognize it's somewhat tautological, but I'm 
+await-ing a task (or future) is different. I recognize it's somewhat tautological, but I'm 
 going to say it anyways: await-ing a task invokes that task's __await__() method. 
 
-That method cedes control to the event-loop passing a reference to itself in the process (i.e. `yield self`); crucially the 
-`__await__` method does not otherwise finish executing. 
-
-The event-loop 
-
-The event-loop returns to its endless cycle of popping items off its queue and running them. 
-Eventually, it will run and finish the task which was await-ed. Now, without the event-loop interceding,
-control and the return value of that task will be provided to the original await statement.
+Roughly speaking, the __await__() method cedes control to the event-loop, and adds a callback to the awaited task indicating
+it should resume this task when its done. In practice, it's slightly more convoluted, but not by too much. You'll get to see all
+the details soon!

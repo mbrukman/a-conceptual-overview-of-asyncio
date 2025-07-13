@@ -4,11 +4,11 @@
 
 `asyncio` leverages those 4 components to pass around control.
 
-`coroutine.send(arg)` is the fundamental method used to start or resume a coroutine. 
+`coroutine.send(arg)` is the method used to start or resume a coroutine. 
 
 If the coroutine was paused and is now being resumed, the argument `arg` will be sent in as the return-value of the `yield` statement which originally paused it. When starting a coroutine, or when there's no value to send in, you can use `coroutine.send(None)`. The code snippet below illustrates both ways of using `coroutine.send(arg)`.
 
-`yield` pauses execution and returns control to the caller. In the example below, the caller is `... = await custom_awaitable` on line 12. Generally, `await` calls the `__await__` method of the given object and then percolates any yields it receives up the call-chain, in this case, that's back to `... = coroutine.send(None)` on line 21. 
+`yield` pauses execution and returns control to the caller. In the example below, the caller is `... = await custom_awaitable` on line 12. Generally, `await` calls the `__await__` method of the given object. `await` also does one more very special thing: it percolates any yields it receives up the call-chain. In this case, that's back to `... = coroutine.send(None)` on line 21. 
 
 Then, we resume the coroutine with `coroutine.send(42)` on line 26. The coroutine picks back up from where it yielded/paused on line 3. Finally, the coroutine executes the remaining statements in its' body. When a coroutine finishes it raises a `StopIteration` exception with the return-value attached to the exception.
 
@@ -56,7 +56,7 @@ Coroutine received value: 42 from awaitable.
 Coroutine finished and provided value: 23.
 ```
 
-The only way to yield (or effectively cede control) from a coroutine is to `await` an object that `yield`s in its `__await__` method. That might sound odd to you. Frankly, it was to me too. 
+The only way to yield (or effectively cede control) from a coroutine is to `await` an object that `yield`s in its `__await__` method. That might sound odd to you. Frankly, it was to me too. You might be thinking:
 1. What about a `yield` directly within the coroutine? The coroutine becomes a generator-coroutine, a different beast entirely. I address generator-coroutines in the Appendix if you're curious.
 2. What about a `yield from` within the coroutine to a function that `yield`s (i.e. plain generator)? SyntaxError: `yield from` not allowed in a coroutine. I believe Python made this a SyntaxError to mandate only one way of using coroutines for the sake of simplicity. Ideologically, `yield from` and `await` are very similar.
 
@@ -91,7 +91,7 @@ class Future:
 
 #### `await`-ing Tasks, Futures & coroutines
 
-Futures also have an important method: `__await__`. Here is the actual, entire implementation found in `asyncio.futures.Future`. It's okay if it doesn't make complete sense now, we'll go through it in detail shortly. 
+Futures have an important method: `__await__`. Here is the actual, entire implementation found in `asyncio.futures.Future`. It's okay if it doesn't make complete sense now, we'll go through it in detail shortly. 
 
 ```python
 1  class Future:
@@ -108,7 +108,7 @@ Futures also have an important method: `__await__`. Here is the actual, entire i
 12         return self.result()
 ```
 
-Task is a subclass of Future meaning it inherits its' attributes & methods. And Task does not override Futures' `__await__` implementation. `await`-ing a Task or Future invokes that above `__await__` method and percolates the `yield` to relinquish control. 
+Task is a subclass of Future meaning it inherits its' attributes & methods. Task does not override Futures' `__await__` implementation. `await`-ing a Task or Future invokes that above `__await__` method and percolates the `yield` to relinquish control. 
 
 ***Unlike Tasks and Futures, `await`-ing a coroutine does not cede control!*** That is, wrapping a coroutine in a Task first, then `await`-ing it will cede control. I'm guessing that design was intentional and meant to allow the author to decide when they want to yield control versus keep it. 
 
