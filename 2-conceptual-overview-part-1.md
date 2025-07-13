@@ -59,7 +59,7 @@ That coroutine represents the function's body or logic. A coroutine has to be ex
 
 #### Tasks
 
-Tasks are coroutines tied to an event-loop. They also maintain a list of callbacks whose importance will become clear
+Tasks are coroutines tied to an event-loop. A Task also maintains a list of callbacks whose importance will become clear
 in a moment when we discuss `await`. 
 
 ```python
@@ -88,9 +88,6 @@ Unfortunately, it actually does matter which type of object await is applied to.
 await-ing a coroutine will immediately invoke that coroutine. Control will never be ceded 
 to the event-loop. The behavior is effectively the exact same as calling a regular function.
 
-await-ing a task (or future) is different. I recognize it's somewhat tautological, but I'm 
-going to say it anyways: await-ing a task invokes that task's __await__() method. 
-
-Roughly speaking, the __await__() method cedes control to the event-loop, and adds a callback to the awaited task indicating
-it should resume this task when its done. In practice, it's slightly more convoluted, but not by too much. You'll get to see all
-the details soon!
+await-ing a task is different. It cedes control to the event-loop, and adds a callback to the awaited task indicating
+it should resume this task when its done. In practice, it's slightly more convoluted, but not by too much. In part 2, you'll 
+see all the details that make this possible.

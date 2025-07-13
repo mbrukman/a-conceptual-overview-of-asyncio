@@ -31,7 +31,7 @@ async def uniform_sum(n_samples: int, time_allotment: float) -> float:
         time_elapsed = time.time() - start_time
         global_idx = chunk_idx * chunk_size + local_idx
         if time_elapsed > time_allotment:
-            print(f"Pausing uniform_sum at: {global_idx:,}. time_elapsed: {time_elapsed:.2f}s.\n")
+            print(f"Pausing uniform_sum at sample_num: {global_idx:,}. time_elapsed: {time_elapsed:.2f}s.\n")
             await YieldToEventLoop()
             print("Resuming uniform_sum.")
             start_time = time.time()

@@ -110,7 +110,8 @@ Futures have an important method: `__await__`. Here is the actual, entire implem
 
 Task is a subclass of Future meaning it inherits its' attributes & methods. Task does not override Futures' `__await__` implementation. `await`-ing a Task or Future invokes that above `__await__` method and percolates the `yield` to relinquish control. 
 
-***Unlike Tasks and Futures, `await`-ing a coroutine does not cede control!*** That is, wrapping a coroutine in a Task first, then `await`-ing it will cede control. I'm guessing that design was intentional and meant to allow the author to decide when they want to yield control versus keep it. 
+***Unlike Tasks and Futures, `await`-ing a coroutine does not cede control!*** That is, wrapping a coroutine in a Task first, then `await`-ing it will cede control. Frankly, I'm not sure why that design decision was made and can't see a particularly compelling 
+reason for it. If you do, please let me know!
 
 ```python
 async def simple_func():

@@ -2,7 +2,8 @@
 Perhaps one where await directly cedes to the event-loop. Nothing else. Though, how to passs values back in such a scheme?
 I think it's best to address this in-line i.e. in part-2.
 
-- Add some details about Tasks & futures (i.e. the dependent/callback tasks and marking as done).
+- Add some details about Tasks & futures (i.e. the dependent/callback tasks and marking as done). 
+I think this is addressed well by part 2 and the walkthrough example [done!]
 
 - Add a glossary for finnicky terms like async & await describing exactly what they mean/do. Hm, on second thought,
 I think these are already fairly well covered.
