@@ -1,5 +1,8 @@
 ## Conceputal Overview Part 1: A Mental Model
 
+In part 1, we'll describe the main, high-level building blocks of asyncio: the event-loop, coroutine functions,
+coroutine objects, tasks & await.
+
 #### Event Loop
 
 Everything in asyncio happens relative to the event-loop. It's the star of the show and there's only one. It's kind of like an orchestra conductor or military general. She's behind the scenes managing resources. Some power is explicitly granted to her, but a lot of her ability to get things done comes from the respect & cooperation of her subordinates.
@@ -56,7 +59,8 @@ That coroutine represents the function's body or logic. A coroutine has to be ex
 
 #### Tasks
 
-Tasks are coroutines tied to an event-loop.
+Tasks are coroutines tied to an event-loop. They also maintain a list of callbacks whose importance will become clear
+in a moment when we discuss `await`. 
 
 ```python
 # This creates a Task object. Instantiating or creating a Task automatically 
@@ -71,3 +75,27 @@ It's common to see a Task instantiated without explicitly specifying the event-l
 super_special_task = asyncio.Task(coro=super_special_func(x=5))
 ```
 
+#### await
+
+await is a Python keyword that's commonly used in one of two different ways:
+```python
+await coroutine
+await task
+```
+
+Unfortunately, it actually does matter which type of object await is applied to.
+
+await-ing a coroutine will immediately invoke that coroutine. Control will never be ceded 
+to the event-loop. The behavior is effectively the exact same as calling a regular function.
+
+await-ing a task (or future or any other object) is different. I recognize it's somewhat tautological, but I'm 
+going to say it anyways: await-ing a task invokes that task's __await__() method. 
+
+That method cedes control to the event-loop passing a reference to itself in the process (i.e. `yield self`); crucially the 
+`__await__` method does not otherwise finish executing. 
+
+The event-loop 
+
+The event-loop returns to its endless cycle of popping items off its queue and running them. 
+Eventually, it will run and finish the task which was await-ed. Now, without the event-loop interceding,
+control and the return value of that task will be provided to the original await statement.

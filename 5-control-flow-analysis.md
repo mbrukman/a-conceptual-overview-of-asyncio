@@ -17,6 +17,22 @@ The actual method that invokes a Tasks' coroutine: `asyncio.tasks.Task.__step_ru
 12             ...
 ```
 
+For reference, here's the Future.__await__() method again.
+```python
+1  class Future:
+2      ...
+3      def __await__(self):
+4      
+5          if not self.done():
+6              self._asyncio_is_future_blocking = True
+7              yield self
+8        
+9          if not self.done():
+10              raise RuntimeError("await wasn't used with future")
+11        
+12         return self.result()
+```
+
 We'll analyze how control flows through this example program: `program.py` and the methods `Task.step` & `Future.__await__`.
 
 ```python
