@@ -2,7 +2,7 @@
 
 ## Motivation
 
-I've used `asyncio` a couple times now, but never really felt confident in my mental-model of how it works and how I can best use it. The official `asyncio` docs provide pretty decent documentation for each specific function in the package, but, in my opinion, lack a cohesive overview of the design and architecture of the system. A way to help the user make informed decisions about which tool in the `asyncio` tool-kit they ought to grab, or to recognize when `asyncio` is the entirely wrong tool-kit. This is my attempt to fill that gap. 
+I've used `asyncio` a couple times now, but never really felt confident in my mental-model of how it works and how I should use it. The official `asyncio` docs provide decent documentation for each specific function in the package, but, in my opinion, lack a cohesive overview of the systems design and architecture. A high-level overview that helps the user understand why there's certain patterns they should follow. And a way to help the user make informed decisions about which tool in the `asyncio` tool-kit they ought to grab, or to recognize when `asyncio` is the entirely wrong tool-kit. This is my attempt to fill that gap. 
 
 A few aspects particually drove my curiosity (read: drove me nuts). You should be able to answer all these questions by the end of this article.
 - What's roughly happening behind the scenes when an objects is `await`-ed? 
@@ -12,8 +12,9 @@ A few aspects particually drove my curiosity (read: drove me nuts). You should b
 
 ## Sections
 
-The first two sections feature some examples but are generally focused on theory. The final two sections are examples
-focused on further illustrating and reinforcing ideas from the first two sections.
+The first two sections feature some examples but are generally focused on theory. The next two sections are examples
+focused on further illustrating and reinforcing ideas from the first two sections. The final section compares multiprocessing,
+multithreading & asyncio plus offers some opinions on the design of await.
 
 #### [A conceptual overview: part 1](https://github.com/anordin95/a-conceptual-overview-of-asyncio/blob/main/1-conceptual-overview-part-1.md)
 

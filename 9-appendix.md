@@ -50,17 +50,3 @@ Though, take my perspective with a grain (or many grains) of salt; there's a dec
 
 
 
-### Links 
-
-A good overview of the fundamental Python language features asyncio uses. 
-https://stackoverflow.com/questions/49005651/how-does-asyncio-actually-work
-
-Good context and basic-intro to asyncio. In my experience, Real Python is generally excellent quality.
-https://realpython.com/async-io-python/
-
-I only skimmed this, but I found the example program at the end very useful to pull apart.
-https://snarky.ca/how-the-heck-does-async-await-work-in-python-3-5/
-
-A good answer to a specific question about why coroutine generators exist.
-https://stackoverflow.com/questions/46203876/what-are-the-differences-between-the-purposes-of-generator-functions-and-asynchr
-
