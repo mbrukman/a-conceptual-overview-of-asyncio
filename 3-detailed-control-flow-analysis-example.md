@@ -74,7 +74,7 @@ program
     event-loop
 ```
 
-And, in more detail here's what that looks like:
+And, in much more detail:
 
 1. Control begins in **`program.py`** 
     * Line 9 creates an event-loop, line 10 creates `main_task` and adds it to the event-loop, line 11 invokes the event-loop. 
