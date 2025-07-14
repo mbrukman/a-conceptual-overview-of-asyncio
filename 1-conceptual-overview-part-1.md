@@ -1,6 +1,6 @@
-## Conceputal Overview Part 1: A Mental Model
+# Conceputal Overview Part 1: A Mental Model
 
-#### Event Loop
+## Event Loop
 
 Everything in asyncio happens relative to the event-loop. It's the star of the show and there's only one. It's kind of like an orchestra conductor or military general. She's behind the scenes managing resources. Some power is explicitly granted to her, but a lot of her ability to get things done comes from the respect & cooperation of her subordinates.
 
@@ -16,7 +16,7 @@ event_loop = asyncio.new_event_loop()
 event_loop.run_forever()
 ```
 
-#### Asynchronous Functions & Coroutines
+## Asynchronous Functions & Coroutines
 
 This is a regular 'ol Python function.
 ```python
@@ -55,7 +55,7 @@ The terms "asynchronous function" (or "coroutine function") and "coroutine objec
 That coroutine represents the function's body or logic. A coroutine has to be explicitly started; again, merely creating the coroutine does not start it. Notably, the coroutine can be paused & resumed. That pausing & resuming ability is what allows
 for asynchronous behavior!
 
-#### Tasks
+## Tasks
 
 Roughly speaking, Tasks are coroutines tied to an event-loop. A Task also maintains a list of callback functions whose importance will become clear in a moment when we discuss `await`. 
 
@@ -72,7 +72,7 @@ It's common to see a Task instantiated without explicitly specifying the event-l
 super_special_task = asyncio.Task(coro=super_special_func(x=5))
 ```
 
-#### await
+## `await`
 
 await is a Python keyword that's commonly used in one of two different ways:
 ```python

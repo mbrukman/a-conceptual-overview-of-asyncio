@@ -1,4 +1,4 @@
-### Network I/O Example
+# Network I/O Example
 
 Performing a database request across a network might take half a second or so, but that's ages in computer-time. Your processor could have done millions or even billions of things. The same is true for, say, requesting a website, downloading a car, loading a file from disk into memory, etc. The general theme is those are all input/output (I/O) actions.
 
@@ -11,10 +11,10 @@ This example has a server (a separate, local process) compute the sum of many sa
 computation finds the sum of many samples from a uniform distribution. As you'll see, the asynchronous approach runs notably faster, since 
 progress can be made on computing the sum of many uniform samples, while waiting for the server to compute the sum of many normal samples.
 
-The entirety of the implementation is shown at the bottom, copied directly from the server-compute-example directory. First, here's
+The entirety of the implementation is shown at the bottom, copied directly from the `./barebones-network-io-example/` directory. First, here's
 the output provided by each script.
 
-#### Serial output
+## Serial output
 ```bash
  $ python serial_approach.py
 Beginning server_request.
@@ -24,7 +24,7 @@ Beginning uniform_sum.
 Total time elapsed: 7.54s.
 ```
 
-#### Asynchronous output
+## Asynchronous output
 ```bash
  $ python async_approach.py
 Beginning uniform_sum.
@@ -58,7 +58,7 @@ Total time elapsed: 4.60s.
 
 ```
 
-#### Serial script
+## Serial script
 
 ```python
 import socket
@@ -94,7 +94,7 @@ print(f"====== Done uniform_sum. total: {total:.2f}. Ran for: {time.time() - sta
 print(f"Total time elapsed: {time.time() - global_start_time:.2f}s.")
 ```
 
-#### Asynchronous script
+## Asynchronous script
 
 ```python
 import socket
@@ -177,7 +177,7 @@ if __name__ == "__main__":
     print(f"Total time elapsed: {time.time() - start_time:.2f}s.")
 ```
 
-#### Server code
+## Server code
 
 ```python
 import socket

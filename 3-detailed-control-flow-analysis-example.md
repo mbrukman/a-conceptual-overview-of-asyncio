@@ -1,6 +1,8 @@
-#### Analyzing an example programs control flow
+# Analyzing an example programs control flow
 
 The actual method that invokes a Tasks' coroutine: `asyncio.tasks.Task.__step_run_and_handle_result` is about 80 lines long. For the sake of clarity, I've removed all of the edge-case error-handling, simplified some aspects and renamed it, but the core logic remains unchanged.
+
+## Task
 
 ```python
 1  class Task(Future):
@@ -14,6 +16,8 @@ The actual method that invokes a Tasks' coroutine: `asyncio.tasks.Task.__step_ru
 9             awaited_task.add_done_callback(self.__step)
 10         ...
 ```
+
+## Future
 
 For reference, here's the Future.__await__() method again.
 ```python
@@ -30,6 +34,7 @@ For reference, here's the Future.__await__() method again.
 11         return self.result()
 ```
 
+## Example program 
 We'll analyze how control flows through this example program: `program.py` and the methods `Task.step` & `Future.__await__`.
 
 ```python
@@ -47,6 +52,7 @@ We'll analyze how control flows through this example program: `program.py` and t
 11 loop.run_forever()
 ```
 
+## Control flow
 1. Control begins in **`program.py`** 
     * Line 9 creates an event-loop, line 10 creates `main_task` and adds it to the event-loop, line 11 invokes the event-loop. 
 1. Control is now in the **`event-loop`**
@@ -89,19 +95,19 @@ Here's another way of writing out that control-flow.
 ```
 program
     event-loop
-        main_task.step (i.e. Task.step)
+        main_task.step
             program::main
-                triple_task.__await__ (i.e. Future.__await__)
+                triple_task.__await__
             program::main
-        main_task.step (i.e. Task.step)
+        main_task.step
     event-loop
-        triple_task.step (i.e. Task.step)
+        triple_task.step
             program::triple
-        triple_task.step (i.e. Task.step)
+        triple_task.step
     event-loop
-        main_task.step  (i.e. Task.step)
-            triple_task.__await__ (i.e. Future.__await__)
+        main_task.step
+            triple_task.__await__
                 program::main
-        main_task.step (i.e. Task.step)
+        main_task.step
     event-loop
 ```

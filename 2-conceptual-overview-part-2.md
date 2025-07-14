@@ -1,12 +1,10 @@
-## Conceputal Overview Part 2: The Nuts & Bolts
+# Conceputal Overview Part 2: The Nuts & Bolts
 
-#### coroutine.send(), await, yield & StopIteration
+## coroutine.send(), await, yield & StopIteration
 
 `asyncio` leverages those 4 components to pass around control.
 
-`coroutine.send(arg)` is the method used to start or resume a coroutine. 
-
-If the coroutine was paused and is now being resumed, the argument `arg` will be sent in as the return value of the `yield` statement which originally paused it. When starting a coroutine, or when there's no value to send in, you can use `coroutine.send(None)`. The code snippet below illustrates both ways of using `coroutine.send(arg)`.
+`coroutine.send(arg)` is the method used to start or resume a coroutine. If the coroutine was paused and is now being resumed, the argument `arg` will be sent in as the return value of the `yield` statement which originally paused it. When starting a coroutine, or when there's no value to send in, you can use `coroutine.send(None)`. The code snippet below illustrates both ways of using `coroutine.send(arg)`.
 
 `yield` pauses execution and returns control to the caller. In the example below, the caller is `... = await custom_awaitable` on line 12. Generally, `await` calls the `__await__` method of the given object. `await` also does one more very special thing: it percolates any yields it receives up the call-chain. In this case, that's back to `... = coroutine.send(None)` on line 16. 
 
@@ -56,7 +54,7 @@ The only way to yield (or effectively cede control) from a coroutine is to `awai
 1. What about a `yield` directly within the coroutine? The coroutine becomes a generator-coroutine, a different beast entirely.
 2. What about a `yield from` within the coroutine to a function that `yield`s (i.e. plain generator)? SyntaxError: `yield from` not allowed in a coroutine. I imagine Python made this a SyntaxError to mandate only one way of using coroutines for the sake of simplicity. Ideologically, `yield from` and `await` are very similar.
 
-#### Futures
+## Futures
 
 A future is an object meant to represent a computation or process's status and result (if any), hence the term future i.e. still to come or not yet happened. 
 
@@ -85,7 +83,7 @@ class Future:
             callback()
 ```
 
-#### `await`-ing Tasks, Futures & coroutines
+## `await`-ing Tasks, Futures & coroutines
 
 Futures have an important method: `__await__`. Here is the actual, entire implementation found in `asyncio.futures.Future`. It's okay if it doesn't make complete sense now, we'll go through it in detail in the control-flow example.
 
