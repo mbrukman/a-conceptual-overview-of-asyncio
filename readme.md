@@ -23,7 +23,7 @@ coroutine objects, tasks & await.
 Part 2 goes into detail on the mechanisms asyncio uses to manage control flow. This is where the magic happens. You'll
 come away from this section knowing what await does behind the scenes and how to make your own asynchronous operators.
 
-#### [Control flow walkthrough](https://github.com/anordin95/a-conceptual-overview-of-asyncio/blob/main/3-detailed-control-flow-analysis-example.md)
+#### [Detailed analysis of an example programs control flow](https://github.com/anordin95/a-conceptual-overview-of-asyncio/blob/main/3-detailed-control-flow-analysis-example.md)
 
 We'll walkthrough, step by step, a simple asynchronous program following along in the key methods of Task & Future that are leveraged when asyncio is orchestrating the show. 
 
@@ -31,4 +31,4 @@ We'll walkthrough, step by step, a simple asynchronous program following along i
 
 A simple but thorough example showing how asyncio can offer an advantage over serial programs. The example doesn't rely on 
 any asyncio operators (besides the event-loop). It's all non-blocking sockets & custom awaitables that help you see what's
-actually happening under the hood.
+actually happening under the hood and illustrate how you could do something similar.
