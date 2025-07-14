@@ -21,19 +21,19 @@ focused on further illustrating and reinforcing ideas practically. The final sec
 In part 1, we'll describe the main, high-level building blocks of asyncio: the event-loop, coroutine functions,
 coroutine objects, tasks & await. 
 
-#### [Barebones server example](https://github.com/anordin95/a-conceptual-overview-of-asyncio/blob/main/4-barebones-network-io-example.md)
+#### [Barebones server example](https://github.com/anordin95/a-conceptual-overview-of-asyncio/blob/main/2-barebones-network-io-example.md)
 
 A simple but thorough example showing how asyncio can offer an advantage over serial programs. The example doesn't rely on 
 any asyncio operators (besides the event-loop). It's all non-blocking sockets & custom awaitables that help you see what's
 actually happening under the hood and illustrate how you could do something similar.
 
-#### [A conceptual overview: part 2](https://github.com/anordin95/a-conceptual-overview-of-asyncio/blob/main/2-conceptual-overview-part-2.md)
+#### [A conceptual overview: part 2](https://github.com/anordin95/a-conceptual-overview-of-asyncio/blob/main/3-conceptual-overview-part-2.md)
 
 Part 2 goes into detail on the mechanisms asyncio uses to manage control flow. This is where the magic happens. You'll
 come away from this section knowing what await does behind the scenes and how to make your own asynchronous operators.
 
-#### [Analyzing an example programs control flow](https://github.com/anordin95/a-conceptual-overview-of-asyncio/blob/main/3-detailed-control-flow-analysis-example.md)
+#### [Analyzing an example programs control flow](https://github.com/anordin95/a-conceptual-overview-of-asyncio/blob/main/5-conclusions.md)
 
 We'll walkthrough, step by step, a simple asynchronous program following along in the key methods of Task & Future that are leveraged when asyncio is orchestrating the show. 
 
-#### [multiprocessing, multithreading & asyncio and some closing thoughts]()
+#### [multiprocessing, multithreading & asyncio and some closing thoughts](https://github.com/anordin95/a-conceptual-overview-of-asyncio/blob/main/5-conclusions.md)
