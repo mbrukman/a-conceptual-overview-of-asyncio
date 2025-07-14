@@ -10,25 +10,24 @@ A few aspects particually drove my curiosity (read: drove me nuts). You should b
 - How does `asyncio.sleep()` run asynchronously while `time.sleep()` does not? 
 - How would I go about writing my own asynchronous variant of some operation (e.g. sleep, network-request, file-read, etc.)?
 
-There were a few blog-posts, stack-overflow discussons and other writings about `asyncio` that I found helpful, but didn't fully provide what I was looking for. You can find them in the Appendix.
+## Sections
 
-## Outline
-
-#### Part 1
+#### [A conceptual overview: part 1](https://github.com/anordin95/a-conceptual-overview-of-asyncio/blob/main/1-conceptual-overview-part-1.md)
 
 In part 1, we'll describe the main, high-level building blocks of asyncio: the event-loop, coroutine functions,
 coroutine objects, tasks & await.
 
-#### Part 2
+
+#### [A conceptual overview: part 2](https://github.com/anordin95/a-conceptual-overview-of-asyncio/blob/main/2-conceptual-overview-part-2.md)
 
 Part 2 goes into detail on the mechanisms asyncio uses to manage control flow. This is where the magic happens. You'll
 come away from this section knowing what await does behind the scenes and how to make your own asynchronous operators.
 
-#### Control flow walkthrough
+#### [Control flow walkthrough](https://github.com/anordin95/a-conceptual-overview-of-asyncio/blob/main/3-detailed-control-flow-analysis-example.md)
 
 We'll walkthrough, step by step, a simple asynchronous program following along in the key methods of Task & Future that are leveraged when asyncio is orchestrating the show. 
 
-#### Barebones server example
+#### [Barebones server example](https://github.com/anordin95/a-conceptual-overview-of-asyncio/blob/main/4-barebones-network-io-example.md)
 
 A simple but thorough example showing how asyncio can offer an advantage over serial programs. The example doesn't rely on 
 any asyncio operators (besides the event-loop). It's all non-blocking sockets & custom awaitables that help you see what's
