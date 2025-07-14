@@ -53,6 +53,29 @@ We'll analyze how control flows through this example program: `program.py` and t
 ```
 
 ## Control flow
+
+```
+program
+    event-loop
+        main_task.step
+            program::main
+                triple_task.__await__
+            program::main
+        main_task.step
+    event-loop
+        triple_task.step
+            program::triple
+        triple_task.step
+    event-loop
+        main_task.step
+            triple_task.__await__
+                program::main
+        main_task.step
+    event-loop
+```
+
+And, in more detail here's what that looks like:
+
 1. Control begins in **`program.py`** 
     * Line 9 creates an event-loop, line 10 creates `main_task` and adds it to the event-loop, line 11 invokes the event-loop. 
 1. Control is now in the **`event-loop`**
@@ -91,23 +114,3 @@ We'll analyze how control flows through this example program: `program.py` and t
 1. Control is now in the **`event-loop`** 
     * There's nothing in the queue. The event-loop cycles aimlessly onwards.
 
-Here's another way of writing out that control-flow. 
-```
-program
-    event-loop
-        main_task.step
-            program::main
-                triple_task.__await__
-            program::main
-        main_task.step
-    event-loop
-        triple_task.step
-            program::triple
-        triple_task.step
-    event-loop
-        main_task.step
-            triple_task.__await__
-                program::main
-        main_task.step
-    event-loop
-```
