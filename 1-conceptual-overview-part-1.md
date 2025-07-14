@@ -22,7 +22,7 @@ This is a regular 'ol Python function.
 ```python
 def hello_printer():
     print(
-        "Hi, I am simple_print(), a lowly, simple printer, though I have all I "
+        "Hi, I am a lowly, simple printer, though I have all I "
         "need in life -- fresh paper & a loving octopus-wife."
     )
 ```
@@ -38,7 +38,7 @@ This is an asynchronous-function or coroutine-function.
 ```python
 async def special_fella(magic_number: int):
     print(
-        "I am a super_special_func. Far cooler than that printer. By the way, 
+        "I am a super special function. Far cooler than that printer. By the way, 
         f"my lucky number is: {magic_number}."
     )
 ```
