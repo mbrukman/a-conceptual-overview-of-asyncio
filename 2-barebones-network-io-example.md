@@ -9,7 +9,7 @@ check again, etc. Basically we're freeing up the CPU to do other activities inst
 
 This example has a server (a separate, local process) compute the sum of many samples from a Gaussian (i.e. normal) distribution. And the local
 computation finds the sum of many samples from a uniform distribution. As you'll see, the asynchronous approach runs notably faster, since 
-progress can be made on computing the sum of many uniform samples, while waiting for the server to compute the sum of many normal samples.
+progress can be made on computing the sum of many uniform samples, while waiting for the server to calculate and respond.
 
 The entirety of the implementation is shown at the bottom, copied directly from the `./barebones-network-io-example/` directory. First, here's
 the output provided by each script.

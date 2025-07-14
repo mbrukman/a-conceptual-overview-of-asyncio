@@ -86,5 +86,5 @@ await-ing a coroutine will immediately invoke that coroutine. Control will **not
 to the event-loop. The behavior of `await coroutine` is effectively the same as invoking a regular Python function.
 
 await-ing a task is different. It cedes control to the event-loop, and adds a callback to the awaited task indicating
-it should resume this task when its done. In practice, it's slightly more convoluted, but not by too much. In part 2, you'll 
+it should resume this task when its done. In practice, it's slightly more convoluted, but not by too much. If you take the red pill Neo (that is, read part 2), you'll 
 see the details that make this possible.
