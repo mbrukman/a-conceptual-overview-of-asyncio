@@ -2,12 +2,11 @@
 
 ## Motivation
 
-I've used Python's asyncio a couple times now, but never really felt confident in my mental model of how it works nor how I should use it. The official docs provide decent documentation for each function in the package, but, in my opinion, lack a cohesive overview of the systems design and architecture. Something that could help the user understand the why and how behind the recommended patterns. And a way to help the user make informed decisions about which tool in the asyncio tool-kit they ought to grab, or to recognize when asyncio is the entirely wrong tool-kit. This is my attempt to fill that gap. 
+I've used Python's asyncio a couple times now, but never really felt confident in my mental model of how it works nor how I should use it. The official docs provide decent documentation for each function in the package, but, in my opinion, lack a cohesive overview of the systems design and architecture. Something that could help the user understand the why and how behind the recommended patterns. And a way to help the user make informed decisions about which tool in the asyncio toolkit they ought to grab, or to recognize when asyncio is the entirely wrong toolkit. This is my attempt to fill that gap. 
 
 A few aspects particually drove my curiosity (read: drove me nuts). You should be able to answer all these questions by the end of this article.
 - What's roughly happening behind the scenes when an objects is `await`-ed? 
 - How does `asyncio` differentiate between a task which doesn't need cpu-time to make progress towards completion (for example a network-request or file-read) as opposed to a task that does need cpu-time to make progress (for example, computing n-factorial)?
-- How does `asyncio.sleep()` run asynchronously while `time.sleep()` does not? 
 - How would I go about writing my own asynchronous variant of some operation (e.g. sleep, network-request, file-read, etc.)?
 
 ## Sections
