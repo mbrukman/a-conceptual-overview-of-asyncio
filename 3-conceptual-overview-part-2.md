@@ -95,16 +95,15 @@ Futures have an important method: `__await__`. Here is the actual, entire implem
 3      def __await__(self):
 4      
 5          if not self.done():
-6              self._asyncio_is_future_blocking = True
-7              yield self
-8        
-9          if not self.done():
-10              raise RuntimeError("await wasn't used with future")
-11        
-12         return self.result()
+6              yield self
+7        
+8          if not self.done():
+9              raise RuntimeError("await wasn't used with future")
+10        
+11         return self.result()
 ```
 
-Task is a subclass of Future meaning it inherits its attributes & methods. Task does not override Futures `__await__` implementation. `await`-ing a Task or Future invokes that above `__await__` method and percolates the `yield` on line 7 above to relinquish control to its caller which is generally the event-loop.
+Task is a subclass of Future meaning it inherits its attributes & methods. Task does not override Futures `__await__` implementation. `await`-ing a Task or Future invokes that above `__await__` method and percolates the `yield` on line 7 above to relinquish control to its caller, which is generally the event-loop.
 
 ***Unlike Tasks and Futures, `await`-ing a coroutine does not cede control!*** That is, wrapping a coroutine in a Task first, then `await`-ing it will cede control. Frankly, I'm not sure why that design decision was made and can't see a particularly compelling 
 reason for it. If you do, please let me know!
