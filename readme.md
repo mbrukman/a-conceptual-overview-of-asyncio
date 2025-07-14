@@ -12,18 +12,20 @@ A few aspects particually drove my curiosity (read: drove me nuts). You should b
 
 ## Sections
 
+The first two sections feature some examples but are generally focused on theory. The final two sections are examples
+focused on further illustrating and reinforcing ideas from the first two sections.
+
 #### [A conceptual overview: part 1](https://github.com/anordin95/a-conceptual-overview-of-asyncio/blob/main/1-conceptual-overview-part-1.md)
 
 In part 1, we'll describe the main, high-level building blocks of asyncio: the event-loop, coroutine functions,
 coroutine objects, tasks & await.
-
 
 #### [A conceptual overview: part 2](https://github.com/anordin95/a-conceptual-overview-of-asyncio/blob/main/2-conceptual-overview-part-2.md)
 
 Part 2 goes into detail on the mechanisms asyncio uses to manage control flow. This is where the magic happens. You'll
 come away from this section knowing what await does behind the scenes and how to make your own asynchronous operators.
 
-#### [Detailed analysis of an example programs control flow](https://github.com/anordin95/a-conceptual-overview-of-asyncio/blob/main/3-detailed-control-flow-analysis-example.md)
+#### [Analyzing an example programs control flow](https://github.com/anordin95/a-conceptual-overview-of-asyncio/blob/main/3-detailed-control-flow-analysis-example.md)
 
 We'll walkthrough, step by step, a simple asynchronous program following along in the key methods of Task & Future that are leveraged when asyncio is orchestrating the show. 
 
