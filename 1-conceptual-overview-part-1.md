@@ -57,11 +57,10 @@ for asynchronous behavior!
 
 ## Tasks
 
-Roughly speaking, Tasks are coroutines tied to an event-loop. A Task also maintains a list of callback functions whose importance will become clear in a moment when we discuss `await`. 
+Roughly speaking, Tasks are coroutines tied to an event-loop. A Task also maintains a list of callback functions whose importance will become clear in a moment when we discuss `await`. When Tasks are created they are automatically added to the event-loop's queue of tasks.
 
 ```python
-# This creates a Task object. Instantiating or creating a Task automatically 
-# adds it to the event-loop's queue.
+# This creates a Task object.
 super_special_task = asyncio.Task(coro=super_special_func(x=5), loop=event_loop)
 ```
 
@@ -72,6 +71,8 @@ It's common to see a Task instantiated without explicitly specifying the event-l
 super_special_task = asyncio.Task(coro=super_special_func(x=5))
 ```
 
+After those two statements are executed, the event-loop should have two corresponding tasks in its queue.
+
 ## `await`
 
 await is a Python keyword that's commonly used in one of two different ways:
@@ -80,11 +81,26 @@ await coroutine
 await task
 ```
 
-Unfortunately, it actually does matter which type of object await is applied to.
+Unfortunately, it actually does matter which type of object await is applied to. 
 
-await-ing a coroutine will immediately invoke that coroutine. Control will **not** be ceded 
-to the event-loop. The behavior of `await coroutine` is effectively the same as invoking a regular Python function.
+await-ing a task will cede control to the event-loop. And adds a callback to the awaited task's list of callbacks indicating it should resume the current task when that one finishes. In practice, it's slightly more convoluted, but not by too much. In part 2, you'll see the details that make this possible.
 
-await-ing a task is different. It cedes control to the event-loop, and adds a callback to the awaited task indicating
-it should resume this task when its done. In practice, it's slightly more convoluted, but not by too much. If you take the red pill Neo (that is, read part 2), you'll 
-see the details that make this possible.
+***Unlike Tasks, await-ing a coroutine does not cede control!*** Wrapping a coroutine in a Task first, then `await`-ing it would cede control. The behavior of `await coroutine` is effectively the same as invoking a regular, synchronous Python function. I'd understand if you're skeptical of this. If you are, play around with the program in `./hypotheses/4-awaiting-a-coroutine-does-not-cede-control-to-the-event-loop.py`. Frankly, I'm not sure why that design decision was made and find it rather confuses the meaning of await: asynchronously wait. I offer my opinions on an alternative approach in the final section.
+
+
+```python
+async def db_request():
+    ...
+
+async def main():
+    
+    # This will invoke db_request() without first yielding to the event-loop.
+    await db_request()
+
+    # This line does two things. First it instantiates the Task which will 
+    # add it to the event-loops' queue. Then, it awaits the Task which will
+    # hit the yield in Future.__await__ and percolate it up allowing the
+    # event-loop to regain control (since the event-loop invoked the main() 
+    # coroutine). Eventually, the event-loop will invoke db_request().
+    await Task(coro=db_request())
+```

@@ -106,6 +106,8 @@ import server
 
 
 class YieldToEventLoop:
+    # This bare method is not quite as simple as it looks. It's ok if you find 
+    # it confusing! Part 2 will hopefully make it clear.
     def __await__(self):
         yield
 

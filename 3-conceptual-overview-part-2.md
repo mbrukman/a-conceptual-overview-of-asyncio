@@ -6,9 +6,9 @@
 
 `coroutine.send(arg)` is the method used to start or resume a coroutine. If the coroutine was paused and is now being resumed, the argument `arg` will be sent in as the return value of the `yield` statement which originally paused it. When starting a coroutine, or when there's no value to send in, you can use `coroutine.send(None)`. The code snippet below illustrates both ways of using `coroutine.send(arg)`.
 
-`yield` pauses execution and returns control to the caller. In the example below, the caller is `... = await custom_awaitable` on line 12. Generally, `await` calls the `__await__` method of the given object. `await` also does one more very special thing: it percolates any yields it receives up the call-chain. In this case, that's back to `... = coroutine.send(None)` on line 16. 
+`yield` pauses execution and returns control to the caller. In the example below, the caller is `... = await custom_awaitable` on line 12. Generally, `await` calls the `__await__` method of the given object. `await` also does one more very special thing: it percolates (or passes along) any yields it receives up the call-chain. In this case, that's back to `... = coroutine.send(None)` on line 16. 
 
-The coroutine resumes due to the `coroutine.send(42)` on line 21. The coroutine picks back up from where it yielded/paused on line 3 and executes the remaining statements in its' body. When a coroutine finishes it raises a `StopIteration` exception with the return value attached to the exception.
+The coroutine is resumed via the `coroutine.send(42)` on line 21. The coroutine picks back up from where it yielded (i.e. paused) on line 3 and executes the remaining statements in its body. When a coroutine finishes it raises a `StopIteration` exception with the return value attached to the exception.
 
 ```python
 1   class Rock:
@@ -103,22 +103,6 @@ Futures have an important method: `__await__`. Here is the actual, entire implem
 
 Task is a subclass of Future meaning it inherits its attributes & methods. Task does not override Futures `__await__` implementation. `await`-ing a Task or Future invokes that above `__await__` method and percolates the `yield` on line 7 above to relinquish control to its caller, which is generally the event-loop.
 
-***Unlike Tasks and Futures, `await`-ing a coroutine does not cede control!*** That is, wrapping a coroutine in a Task first, then `await`-ing it will cede control. Frankly, I'm not sure why that design decision was made and can't see a particularly compelling 
-reason for it. If you do, please let me know!
+The control flow example next will examine in detail how control flow and values are passed through an example asyncio program.
 
-```python
-async def db_request():
-    ...
 
-async def main():
-    
-    # This will invoke db_request() without yielding to the event-loop.
-    await db_request()
-
-    # This line does two things. First it instantiates the Task which will 
-    # add it to the event-loops' queue. Then, it awaits the Task which will
-    # hit the yield in Future.__await__ and percolate it up allowing the
-    # event-loop to regain control (since the event-loop invoked the main() 
-    # coroutine). Eventually, the event-loop will invoke db_request().
-    await Task(coro=db_request())
-```
