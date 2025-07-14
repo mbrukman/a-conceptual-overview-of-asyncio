@@ -1,8 +1,5 @@
 ## Conceputal Overview Part 1: A Mental Model
 
-In part 1, we'll describe the main, high-level building blocks of asyncio: the event-loop, coroutine functions,
-coroutine objects, tasks & await.
-
 #### Event Loop
 
 Everything in asyncio happens relative to the event-loop. It's the star of the show and there's only one. It's kind of like an orchestra conductor or military general. She's behind the scenes managing resources. Some power is explicitly granted to her, but a lot of her ability to get things done comes from the respect & cooperation of her subordinates.
@@ -23,44 +20,44 @@ event_loop.run_forever()
 
 This is a regular 'ol Python function.
 ```python
-def simple_func(x: int):
+def hello_printer():
     print(
-        f"I am simple_func. I live a simple life. Someone knocked "
-        f"on my door this morning to give me x: {x}."
+        "Hi, I am simple_print(), a lowly, simple printer, though I have all I "
+        "need in life -- fresh paper & a loving octopus-wife."
     )
 ```
 
 Calling a regular function invokes its' logic or body. 
 ```python
->>> simple_func(x=5)
-I am simple_func. I live a simple life. Someone knocked on my door this morning to give me x: 5.
->>> 
+>>> hello_printer()
+Hi, I am simple_print(), a lowly, simple printer, though I have all I need in life -- fresh paper & a loving octopus-wife.
+>>>
 ```
 
-And this is an asynchronous-function or coroutine-function.
+This is an asynchronous-function or coroutine-function.
 ```python
-async def super_special_func(x: int):
+async def special_fella(magic_number: int):
     print(
-        f"I am super_special_func. I am way cooler than simple_func. "
-        f"Someone knocked on my door this morning to give me x: {x}."
+        "I am a super_special_func. Far cooler than that printer. By the way, 
+        f"my lucky number is: {magic_number}."
     )
 ```
 
-Calling an asynchronous function creates and returns a coroutine object.
+Calling an asynchronous function creates and returns a coroutine object. Note it does not execute the function.
 ```python
->>> super_special_func(x=5)
-<coroutine object super_special_func at 0x104ed2740>
+>>> special_fella(magic_number=3)
+<coroutine object special_fella at 0x104ed2740>
 >>> 
 ```
 
-The terms "asynchronous function" (or "coroutine function") and "coroutine object" are often conflated as coroutine. I find that a tad confusing. In this article, coroutine will exclusively mean "coroutine object". 
+The terms "asynchronous function" (or "coroutine function") and "coroutine object" are often conflated as coroutine. I find that a tad confusing. In this article, coroutine will exclusively mean "coroutine object" -- the thing produced by executing a coroutine function.
 
-That coroutine represents the function's body or logic. A coroutine has to be explicitly started; merely creating the coroutine does not start it. Notably, it can be paused & resumed. That pausing & resuming ability is what makes it asynchronous and special!
+That coroutine represents the function's body or logic. A coroutine has to be explicitly started; again, merely creating the coroutine does not start it. Notably, the coroutine can be paused & resumed. That pausing & resuming ability is what allows
+for asynchronous behavior!
 
 #### Tasks
 
-Tasks are coroutines tied to an event-loop. A Task also maintains a list of callbacks whose importance will become clear
-in a moment when we discuss `await`. 
+Roughly speaking, Tasks are coroutines tied to an event-loop. A Task also maintains a list of callback functions whose importance will become clear in a moment when we discuss `await`. 
 
 ```python
 # This creates a Task object. Instantiating or creating a Task automatically 
@@ -85,9 +82,9 @@ await task
 
 Unfortunately, it actually does matter which type of object await is applied to.
 
-await-ing a coroutine will immediately invoke that coroutine. Control will never be ceded 
-to the event-loop. The behavior is effectively the exact same as calling a regular function.
+await-ing a coroutine will immediately invoke that coroutine. Control will **not** be ceded 
+to the event-loop. The behavior of `await coroutine` is effectively the same as invoking a regular Python function.
 
 await-ing a task is different. It cedes control to the event-loop, and adds a callback to the awaited task indicating
 it should resume this task when its done. In practice, it's slightly more convoluted, but not by too much. In part 2, you'll 
-see all the details that make this possible.
+see the details that make this possible.

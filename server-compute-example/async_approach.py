@@ -16,11 +16,9 @@ async def uniform_sum(n_samples: int, time_allotment: float) -> float:
     start_time = time.time()
     total = 0.0
     
-    # Without chunking the runtime savings of asyncio are more than 
+    # Without chunking, the runtime savings of asyncio are more than 
     # entirely eaten up by having to check time.time() and an if-condition 
-    # on every one of the many iterations of n_samples. In this approach
-    # we only check the elapsed time against the time_allotment after each 
-    # chunk.
+    # on every one of the many iterations of n_samples.
     n_chunks = 40
     chunk_size = int(n_samples / n_chunks)
 
@@ -36,7 +34,7 @@ async def uniform_sum(n_samples: int, time_allotment: float) -> float:
             print("Resuming uniform_sum.")
             start_time = time.time()
     
-    # Ensure any remainder is still processed.
+    # Ensure any remainder is processed.
     for _ in range(chunk_size * n_chunks, n_samples):
         total += random.random()
 
