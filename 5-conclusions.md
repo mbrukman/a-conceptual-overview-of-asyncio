@@ -16,7 +16,7 @@ to also get around the GIL in a single process by leveraging C extensions.
 Multi-threading and asyncio are much more similar in where they're useful with Python; not at all for computationally-bound
 work. And very useful for I/O bound work. For applications that don't need to manage absolutely tons of distinct I/O connections, I think the choice between which to use is somewhat down to taste.
 
-Multi-threading maintains a distinct OS-managed thread for each chunk of work. Whereas asyncio uses Tasks for each 
+Multi-threading maintains an OS-managed thread for each chunk of work. Whereas asyncio uses Tasks for each 
 work-chunk and manages them via the event-loop's queue. I believe the marginal overhead of one more chunk of work is a fair bit lower for asyncio than threads, which can matter a lot for applications that need to manage many, many chunks of work. 
 
 There are some other benefits associated with using asyncio. One is clearer visibility into when and where interleaving occurs. The code chunk between two awaits is certainly synchronous. Another is simpler debugging, since it's easier to attach and follow a trace and reason about code execution. With threading, the interleaving is more of a black-box. One benefit of multithreading is not really having to worry about greedy threads hogging execution, something that could happen with asyncio where a greedy coroutine never awaits and effectively stalls the event-loop.
@@ -29,7 +29,7 @@ Frankly, I'm somewhat confused by a few of the design decisions in asyncio. If y
 
 When you see an `await object` statement in some codebase, you need to know whether that object is a coroutine or a task/future to understand its impact. If object is a coroutine, an asynchronous wait is not actually going to occur and the event-loop cannot intercede. I think that makes skimming a codebase harder than it needs to be and obfuscates the meaning of the await keyword.
 
-The downside is there'd be no way to synchronously invoke a coroutine. Of course, there are already ways to synchronously invoke chunks of code: regular Python functions. I imagine the edge case where someone sometimes wants to invoke a coroutine synchronously in some places and in other places asynchronously is somewhat rare. My gut also says if an applications needs the same coroutine synchronous in some cases and asynchronous in others, there may be flaws in its broader usage of async that explain the problem. Nonetheless I think it could still be addressable in one of two ways: have a synchronous variant of the function or use coroutine.send(arg).
+The downside is there'd be no way to synchronously invoke a coroutine. Of course, there are already ways to synchronously invoke chunks of code: regular Python functions. I imagine the edge case where someone sometimes wants to invoke a coroutine synchronously in some places and in other places asynchronously is somewhat rare. My gut also says if an applications needs the same coroutine synchronous in some cases and asynchronous in others, there may be flaws in its broader usage of async that explain the problem. Nonetheless I think that problem could still be addressed in one of two ways: have a synchronous variant of the function or use coroutine.send(arg).
 
 To me, simplifying and clarifying await is easily worth that minor downside.
 
