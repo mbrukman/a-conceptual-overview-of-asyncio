@@ -21,7 +21,7 @@ focused on further illustrating and reinforcing ideas practically. The final sec
 In part 1, we'll describe the main, high-level building blocks of asyncio: the event-loop, coroutine functions,
 coroutine objects, tasks & await. 
 
-#### [Barebones server example](https://github.com/anordin95/a-conceptual-overview-of-asyncio/blob/main/2-barebones-network-io-example.md)
+#### [Barebones network I/O example](https://github.com/anordin95/a-conceptual-overview-of-asyncio/blob/main/2-barebones-network-io-example.md)
 
 A simple but thorough example showing how asyncio can offer an advantage over serial programs. The example doesn't rely on 
 any asyncio operators (besides the event-loop). It's all non-blocking sockets & custom awaitables that help you see what's
