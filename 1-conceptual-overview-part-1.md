@@ -99,8 +99,7 @@ async def main():
 
     # This line does two things. First it instantiates the Task which will 
     # add it to the event-loops' queue. Then, it awaits the Task which will
-    # hit the yield in Future.__await__ and percolate it up allowing the
-    # event-loop to regain control (since the event-loop invoked the main() 
-    # coroutine). Eventually, the event-loop will invoke db_request().
+    # yield control to the event-loop. Eventually, the event-loop will 
+    # invoke db_request().
     await Task(coro=db_request())
 ```
