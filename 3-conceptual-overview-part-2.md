@@ -4,7 +4,7 @@
 
 `asyncio` leverages those 4 components to pass around control.
 
-`coroutine.send(arg)` is the method used to start or resume a coroutine. If the coroutine was paused and is now being resumed, the argument `arg` will be sent in as the return value of the `yield` statement which originally paused it. When starting a coroutine, or when there's no value to send in, you can use `coroutine.send(None)`. The code snippet below illustrates both ways of using `coroutine.send(arg)`.
+`coroutine.send(arg)` is the method used to start or resume a coroutine. If the coroutine was paused and is now being resumed, the argument `arg` will be sent in as the return value of the `yield` statement which originally paused it. 
 
 `yield` pauses execution and returns control to the caller. In the example below, the caller is `... = await custom_awaitable` on line 12. Generally, `await` calls the `__await__` method of the given object. `await` also does one more very special thing: it percolates (or passes along) any yields it receives up the call-chain. In this case, that's back to `... = coroutine.send(None)` on line 16. 
 
