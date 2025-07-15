@@ -13,7 +13,7 @@ to also get around the GIL in a single process by leveraging C extensions.
 
 ### Multi-threading & asyncio
 
-Multi-threading and asyncio are much more similar in where they're useful for Python; not at all for computationally-bound
+Multi-threading and asyncio are much more similar in where they're useful with Python; not at all for computationally-bound
 work. And very useful for I/O bound work. For applications that don't need to manage absolutely tons of distinct I/O connections, I think the choice between which to use is somewhat down to taste.
 
 Multi-threading maintains a distinct OS-managed thread for each chunk of work. Whereas asyncio uses Tasks for each 

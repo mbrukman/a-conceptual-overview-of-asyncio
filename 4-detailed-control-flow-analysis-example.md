@@ -57,23 +57,23 @@ We'll analyze how control flows through this example program: `program.py` and t
 At a high-level, this is how control flows: 
 
 ```
-program
-    event-loop
-        main_task.step
-            program::main
-                triple_task.__await__
-            program::main
-        main_task.step
-    event-loop
-        triple_task.step
-            program::triple
-        triple_task.step
-    event-loop
-        main_task.step
-            triple_task.__await__
-                program::main
-        main_task.step
-    event-loop
+1  program
+2      event-loop
+3          main_task.step
+4              program::main
+5                  triple_task.__await__
+6              program::main
+7          main_task.step
+8      event-loop
+9          triple_task.step
+10             program::triple
+11         triple_task.step
+12     event-loop
+13         main_task.step
+14             triple_task.__await__
+15                 program::main
+16         main_task.step
+17     event-loop
 ```
 
 And, in much more detail:
