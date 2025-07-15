@@ -13,13 +13,13 @@ to also get around the GIL in a single process by leveraging C extensions.
 
 ## Multi-threading & asyncio
 
-Multi-threading and asyncio are much more similar in their usage for Python; they're not useful for computationally-bound
-work. They are very useful for I/O bound work. And for applications that don't need to manage lots of distinct I/O connections, I think the choice between which to use is somewhat down to taste.
+Multi-threading and asyncio are much more similar in where they're useful for Python; not at all for computationally-bound
+work. And very useful for I/O bound work. For applications that don't need to manage lots of distinct I/O connections, I think the choice between which to use is somewhat down to taste.
 
 Multi-threading maintains a distinct OS-managed thread for each chunk of work. Whereas asyncio uses Tasks for each 
-work-chunk and manages them via the event-loop's queue. I believe the marginal overhead of one more chunk of work is lower for asyncio than threads, which can matter a lot for applications that need to manage many, many chunks of work. 
+work-chunk and manages them via the event-loop's queue. I believe the marginal overhead of one more chunk of work is a fair bit lower for asyncio than threads, which can matter a lot for applications that need to manage many, many chunks of work. 
 
-One slight benefit of asyncio is clearer visibility into when and where interleaving occurs. The code chunk between two awaits is certainly synchronous. Whereas with threading, the interleaving is more of a black-box. One slight benefit of multithreading is not really having to worry about greedy threads hogging execution, something that could happen with asyncio where a greedy coroutine never awaits and effectively stalls the event-loop.
+One further benefit of asyncio is clearer visibility into when and where interleaving occurs. The code chunk between two awaits is certainly synchronous. Whereas with threading, the interleaving is more of a black-box. One benefit of multithreading is not really having to worry about greedy threads hogging execution, something that could happen with asyncio where a greedy coroutine never awaits and effectively stalls the event-loop.
 
 ## My opinions & suggestions on certain design choices
 

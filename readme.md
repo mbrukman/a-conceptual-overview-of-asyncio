@@ -37,3 +37,5 @@ come away from this section knowing what await does behind the scenes and how to
 We'll walkthrough, step by step, a simple asynchronous program following along in the key methods of Task & Future that are leveraged when asyncio is orchestrating the show. 
 
 #### [multiprocessing, multithreading & asyncio and some closing thoughts](https://github.com/anordin95/a-conceptual-overview-of-asyncio/blob/main/5-conclusions.md)
+
+This section briefly describes and contrasts the three common approaches to concurrency and where each is most useful. Additionally I offer my thoughts on two aspects of asyncio's design that I think could be improved.
