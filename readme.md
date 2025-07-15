@@ -6,7 +6,7 @@ I've used Python's asyncio a couple times now, but never really felt confident i
 
 There were some articles I found online that were very helpful with certain aspects, but didn't totally cover what I was after. They're linked at the end of the final section.
 
-A few aspects particually drove my curiosity (read: drove me nuts). You should be able to answer all these questions by the end of this article.
+During my learning process, a few aspects particually drove my curiosity (read: drove me nuts). You should be able to answer all these questions by the end of this article.
 - What's roughly happening behind the scenes when an objects is `await`-ed? 
 - How does `asyncio` differentiate between a task which doesn't need cpu-time to make progress towards completion (for example a network-request or file-read) as opposed to a task that does need cpu-time to make progress (for example, computing n-factorial)?
 - How would I go about writing my own asynchronous variant of some operation (e.g. sleep, network-request, file-read, etc.)?
