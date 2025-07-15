@@ -2,9 +2,9 @@
 
 ## Motivation
 
-I've used Python's asyncio a couple times now, but never really felt confident in my mental model of how it works nor how I should use it. The official docs provide decent documentation for each function in the package, but, in my opinion, lack a cohesive overview of the systems design and architecture. Something that could help the user understand the why and how behind the recommended patterns. And a way to help the user make informed decisions about which tool in the asyncio toolkit they ought to grab, or to recognize when asyncio is the entirely wrong toolkit. This is my attempt to fill that gap. 
+I've used Python's asyncio a couple times now, but never really felt confident in my mental model of how it works nor how I should use it. The official docs provide decent documentation for each function in the package, but, in my opinion, lack a cohesive overview of the systems design and architecture. Something that could help the user understand the why and how behind the recommended patterns. And a way to help the user make informed decisions about which tool in the asyncio toolkit they ought to grab, or to recognize when asyncio is the entirely wrong toolkit. 
 
-There were some articles I found online that partially answered or helped me better understand asyncio, but didn't totally get into what I wanted to know. You can find them linked in the conclusion section.
+There were some articles I found online that partially answered my questions or helped me better understand some aspects of asyncio, but didn't totally get into everything I wanted to know. This is my attempt to fill that gap and share what I learned.
 
 A few aspects particually drove my curiosity (read: drove me nuts). You should be able to answer all these questions by the end of this article.
 - What's roughly happening behind the scenes when an objects is `await`-ed? 
