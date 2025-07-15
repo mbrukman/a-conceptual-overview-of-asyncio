@@ -1,3 +1,0 @@
-- I don't understand why await was designed to only call __await__. Surely there's a better design?
-Perhaps one where await directly cedes to the event-loop. Nothing else. Though, how to passs values back in such a scheme?
-I think it's best to address this in-line i.e. in part-2.
