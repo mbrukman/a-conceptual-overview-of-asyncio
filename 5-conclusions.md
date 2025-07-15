@@ -23,9 +23,9 @@ One further benefit of asyncio is clearer visibility into when and where interle
 
 ## Opinions and suggestions on certain design choices
 
-Frankly, I'm somewhat confused by a few of the design decisions in asyncio. If you do know or see a reason I'm missing for why they're beneficial, please let me know! I see two possible changes that could simplify people's experience working with asyncio.
+Frankly, I'm somewhat confused by a few of the design decisions in asyncio. If you do know or see a reason I'm missing for why they're beneficial, please let me know! I see two possible changes that could simplify people's experience working with asyncio. I feel much more strongly about the first one than the second.
 
-### 1. await coroutine should be disallowed.
+### 1. await coroutine should be disallowed or should yield to the event-loop
 
 When you see an `await object` statement in some codebase, you need to know whether that object is a coroutine or a task/future to understand its impact. If object is a coroutine, an asynchronous wait is not actually going to occur and the event-loop cannot intercede. I think that makes skimming a codebase harder than it needs to be and obfuscates the meaning of the await keyword.
 
@@ -35,18 +35,18 @@ To me, simplifying and clarifying await is easily worth that minor downside.
 
 ### 2. The Task constructor should accept coroutine functions.
 
-I think one common source of confusion for folks is coroutine functions versus coroutine objects. Building off of the first suggestion, if `await coroutine` is disallowed, there will be far fewer instances of needing to work with coroutine objects or even to have them around. Instead, let the Task constructor manage creation of them. This change would also mean the stylistic approach of asyncio would match multiprocessing and multithreading -- directly passing a callable-looking object to the Process, Thread, or Task constructor.
+I think one common source of confusion for folks is coroutine functions versus coroutine objects. Building off of the first suggestion, if `await coroutine` is disallowed, there will be far fewer instances of needing to work with coroutine objects or even to have them around. Instead, let the Task constructor manage creation of them. This change would also mean the stylistic approach of asyncio could match multiprocessing and multithreading -- directly passing a callable-looking object to the Process, Thread, or Task constructor. Additionally, this would remove the red-herrings that look like function calls by mimicking their notation but are instead calls to create coroutine objects.
 
 ```python
-async def do_work():
+async def do_work(x, y):
     pass
 
-def thread_target():
+def thread_target(x, y):
     pass
 
 def main():
-    t = threading.Thread(thread_target)
-    t = asyncio.Task(do_work)
+    t = threading.Thread(thread_target, args=(1, 2))
+    t = asyncio.Task(do_work, args=(3,4))
 ```
 
 ## Further reading
