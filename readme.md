@@ -14,7 +14,7 @@ During my learning process, a few aspects particually drove my curiosity (read: 
 ## Sections
 
 The first and third sections feature some examples but are generally focused on theory. The second and fourth sections are examples
-focused on further illustrating and reinforcing ideas practically. The final section wraps up, compares multiprocessing, multithreading & asyncio; it also offers some opinions and suggestions on asyncio's design.
+focused on further illustrating and reinforcing ideas practically. The final section compares multiprocessing, multithreading & asyncio; and offers some opinions and suggestions on asyncio's design.
 
 #### [A conceptual overview part 1: a mental model](https://github.com/anordin95/a-conceptual-overview-of-asyncio/blob/main/1-conceptual-overview-part-1.md)
 
