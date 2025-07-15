@@ -83,7 +83,7 @@ await task
 
 Unfortunately, it actually does matter which type of object await is applied to. 
 
-await-ing a task will cede control to the event-loop. And adds a callback to the awaited task's list of callbacks indicating it should resume the current task when that one finishes. In practice, it's slightly more convoluted, but not by too much. In part 2, you'll see the details that make this possible.
+await-ing a task will cede control to the event-loop. And while doing so, add a callback to the awaited task's list of callbacks indicating it should resume the current task when that one finishes. In practice, it's slightly more convoluted, but not by too much. In part 2, you'll walk through all the details that make this possible.
 
 ***Unlike Tasks, await-ing a coroutine does not cede control!*** Wrapping a coroutine in a Task first, then `await`-ing it would cede control. The behavior of `await coroutine` is effectively the same as invoking a regular, synchronous Python function. I'd understand if you're skeptical of this. If you are, play around with the program in `./hypotheses/4-awaiting-a-coroutine-does-not-cede-control-to-the-event-loop.py`. Frankly, I'm not sure why that design decision was made and find it rather confuses the meaning of await: asynchronously wait. I offer my opinions on an alternative approach in the final section.
 
