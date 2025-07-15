@@ -19,7 +19,7 @@ The actual method that invokes a Tasks coroutine: `asyncio.tasks.Task.__step_run
 
 ## Future
 
-For reference, here's the Future.__await__() method again.
+For ease of reference, here's the `Future.__await__` method again.
 ```python
 1  class Future:
 2      ...    
@@ -53,6 +53,8 @@ We'll analyze how control flows through this example program: `program.py` and t
 ```
 
 ## Control flow
+
+At a high-level, this is how control flows: 
 
 ```
 program
