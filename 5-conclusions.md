@@ -21,7 +21,7 @@ work-chunk and manages them via the event-loop's queue. I believe the marginal o
 
 One further benefit of asyncio is clearer visibility into when and where interleaving occurs. The code chunk between two awaits is certainly synchronous. Whereas with threading, the interleaving is more of a black-box. One benefit of multithreading is not really having to worry about greedy threads hogging execution, something that could happen with asyncio where a greedy coroutine never awaits and effectively stalls the event-loop.
 
-# My opinions & suggestions on certain design choices
+# Suggestions on some design choices
 
 Frankly, I'm somewhat confused by a few of the design decisions in asyncio. If you do know or see a reason I'm missing for why they're beneficial, please let me know!
 
