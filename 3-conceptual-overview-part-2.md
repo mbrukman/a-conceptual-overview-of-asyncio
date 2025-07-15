@@ -52,7 +52,7 @@ It's worth pausing for a moment here and making sure you followed the various wa
 
 The only way to yield (or effectively cede control) from a coroutine is to `await` an object that `yield`s in its `__await__` method. That might sound odd to you. Frankly, it was to me too. You might be thinking:
 1. What about a `yield` directly within the coroutine? The coroutine becomes a generator-coroutine, a different beast entirely.
-2. What about a `yield from` within the coroutine to a function that `yield`s (i.e. plain generator)? SyntaxError: `yield from` not allowed in a coroutine. I imagine Python made this a SyntaxError to mandate only one way of using coroutines for the sake of simplicity. Ideologically, `yield from` and `await` are very similar.
+2. What about a `yield from` within the coroutine to a function that `yield`s (i.e. plain generator)? SyntaxError: `yield from` not allowed in a coroutine. I imagine Python made this a SyntaxError to mandate only one way of using coroutines for the sake of simplicity. Ideologically, `yield from` and `await` are quite similar.
 
 ## Futures
 
@@ -69,7 +69,7 @@ class Future:
         self.result = None
         self.callbacks = []
     
-    def done(self) -> bool:
+    def is_done(self) -> bool:
         is_future_done = self.state == 'done'
         return is_future_done
 
@@ -103,6 +103,6 @@ Futures have an important method: `__await__`. Here is the actual, entire implem
 
 Task is a subclass of Future meaning it inherits its attributes & methods. Task does not override Futures `__await__` implementation. `await`-ing a Task or Future invokes that above `__await__` method and percolates the `yield` on line 7 above to relinquish control to its caller, which is generally the event-loop.
 
-The control flow example next will examine in detail how control flow and values are passed through an example asyncio program.
+The control flow example next will examine in detail how control flow and values are passed through an example asyncio program, the event-loop, `Future.__await__` and `Task.step`. 
 
 
