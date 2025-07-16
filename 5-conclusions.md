@@ -25,7 +25,7 @@ There are some other benefits associated with using asyncio. One is clearer visi
 
 I'm somewhat confused by a few of the design decisions in asyncio. If you do know or see a reason I'm missing for why they're beneficial, please let me know! I see two possible changes that could simplify people's experience working with asyncio. I feel much more strongly about the first one than the second.
 
-### 1. await coroutine should be disallowed or should yield to the event-loop
+### 1. `await coroutine` should be disallowed or should yield to the event-loop
 
 When you see an `await object` statement in some codebase, you need to know whether that object is a coroutine or a task/future to understand its impact. If object is a coroutine, an asynchronous wait is not actually going to occur and the event-loop cannot intercede. I think that makes skimming a codebase harder than it needs to be and obfuscates the meaning of the await keyword.
 
