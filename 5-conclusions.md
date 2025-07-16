@@ -33,7 +33,7 @@ The downside is there'd be no way to synchronously invoke a coroutine. Of course
 
 To me, simplifying and clarifying await is easily worth that minor downside.
 
-### 2. The Task constructor should accept coroutine functions.
+### 2. The Task constructor should accept coroutine functions
 
 I think one common source of confusion for folks is coroutine functions versus coroutine objects. Building off of the first suggestion, if `await coroutine` is disallowed, there will be far fewer instances of needing to work with coroutine objects or even to have them around. Instead, let the Task constructor manage creation of them. This change would also mean the stylistic approach of asyncio could match multiprocessing and multithreading -- directly passing a callable-looking object to the Process, Thread, or Task constructor. Additionally, this would remove the red-herrings that look like function calls by mimicking their notation but are instead calls to create coroutine objects.
 
