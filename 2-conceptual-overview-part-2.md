@@ -4,7 +4,7 @@
 
 `asyncio` leverages those 4 components to pass around control.
 
-`coroutine.send(arg)` is the method used to start or resume a coroutine. If the coroutine was paused and is now being resumed, the argument `arg` will be sent in as the return value of the `yield` statement which originally paused it. 
+`coroutine.send(arg)` is the method used to start or resume a coroutine. If the coroutine was paused and is now being resumed, the argument `arg` will be sent in as the return value of the `yield` statement which originally paused it. If the coroutine is being started (not resumed) arg must be None.
 
 `yield` pauses execution and returns control to the caller. In the example below, the yield is on line 3 and the caller is `... = await rock` on line 11. Generally, `await` calls the `__await__` method of the given object. `await` also does one more very special thing: it percolates (or passes along) any yields it receives up the call-chain. In this case, that's back to `... = coroutine.send(None)` on line 16. 
 
@@ -58,9 +58,9 @@ The only way to yield (or effectively cede control) from a coroutine is to `awai
 
 A future is an object meant to represent a computation or process's status and result (if any), hence the term future i.e. still to come or not yet happened. 
 
-A future has a few important attributes. One is its state which can be either 'pending', 'cancelled' or 'done'. Another is its result which is set when the state transitions to 'done'. To be clear, a Future does not represent the actual computation to be done, like a coroutine does, instead it represents the status and result of that computation, kind of like a status-light (red, yellow or green) or indicator. 
+A future has a few important attributes. One is its state which can be either pending, cancelled or done. Another is its result which is set when the state transitions to done. To be clear, a Future does not represent the actual computation to be done, like a coroutine does, instead it represents the status and result of that computation, kind of like a status-light (red, yellow or green) or indicator. 
 
-Task subclasses Future in order to gain these various capabilities. I said in the prior section tasks store a list of callbacks and I lied. It's actually the Future class that implements this logic. That is, a future stores callbacks or functions it should call once its state becomes 'done'.
+Task subclasses Future in order to gain these various capabilities. I said in the prior section tasks store a list of callbacks and I lied a bit. It's actually the Future class that implements this logic which Task inherits.
 
 Futures may be also used directly i.e. not via tasks. Tasks mark themselves as done when their coroutine's complete. Futures are much more versatile and will be marked as done when you say so. In this way, they're the flexible interface for you to make your own conditions for waiting. Here's how you could leverage Future to create your own variant of asynchronous sleep (i.e. asyncio.sleep).
 
@@ -121,7 +121,7 @@ Done main() at time: 12:13:06.
 
 ## `await`-ing Tasks & Futures
 
-Futures have an important method: `__await__`. Here is the actual, entire implementation found in `asyncio.futures.Future`. It's okay if it doesn't make complete sense now, we'll go through it in detail in the control-flow example.
+Future defines an important method: `__await__`. Here is the actual, entire implementation found in `asyncio.futures.Future`. It's okay if it doesn't make complete sense now, we'll go through it in detail in the control-flow example.
 
 ```python
 1  class Future:
