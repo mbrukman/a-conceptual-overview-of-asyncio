@@ -6,7 +6,7 @@
 
 `coroutine.send(arg)` is the method used to start or resume a coroutine. If the coroutine was paused and is now being resumed, the argument `arg` will be sent in as the return value of the `yield` statement which originally paused it. 
 
-`yield` pauses execution and returns control to the caller. In the example below, the caller is `... = await custom_awaitable` on line 12. Generally, `await` calls the `__await__` method of the given object. `await` also does one more very special thing: it percolates (or passes along) any yields it receives up the call-chain. In this case, that's back to `... = coroutine.send(None)` on line 16. 
+`yield` pauses execution and returns control to the caller. In the example below, the yield is on line 3 and the caller is `... = await rock` on line 11. Generally, `await` calls the `__await__` method of the given object. `await` also does one more very special thing: it percolates (or passes along) any yields it receives up the call-chain. In this case, that's back to `... = coroutine.send(None)` on line 16. 
 
 The coroutine is resumed via the `coroutine.send(42)` on line 21. The coroutine picks back up from where it yielded (i.e. paused) on line 3 and executes the remaining statements in its body. When a coroutine finishes it raises a `StopIteration` exception with the return value attached to the exception.
 
@@ -58,29 +58,58 @@ The only way to yield (or effectively cede control) from a coroutine is to `awai
 
 A future is an object meant to represent a computation or process's status and result (if any), hence the term future i.e. still to come or not yet happened. 
 
-A future has a few important attributes. One is its' state which can be either 'pending', 'cancelled' or 'done'. Another is its' result which is set when the state transitions to 'done'. To be clear, a Future does not represent the actual computation to be done, like a coroutine does, instead it represents the status and result of that computation, kind of like a status-light (red, yellow or green) or indicator. Finally, a future stores callbacks or functions it should call once its' state becomes 'done'.
+A future has a few important attributes. One is its' state which can be either 'pending', 'cancelled' or 'done'. Another is its' result which is set when the state transitions to 'done'. To be clear, a Future does not represent the actual computation to be done, like a coroutine does, instead it represents the status and result of that computation, kind of like a status-light (red, yellow or green) or indicator. 
 
-Here's that same description roughly stated in code:
+Task subclasses Future in order to gain these various features. I said in the prior section tasks store a list of callbacks and I lied. It's actually the Future class that implements this logic. That is, a future stores callbacks or functions it should call once its' state becomes 'done'.
+
+Futures may be also used directly i.e. not via tasks. Tasks mark themselves as done when their coroutine's complete. Futures are much more versatile and will be marked as done when you say so. In this way, they're the flexible interface for you to make your own conditions for waiting.
+
+Here's how you could leverage Future to create your own variant of asynchronous sleep (i.e. asyncio.sleep).
 
 ```python
-class Future:
-    def __init__(self):
-        self.state = 'pending'
-        self.result = None
-        self.callbacks = []
-    
-    def is_done(self) -> bool:
-        is_future_done = self.state == 'done'
-        return is_future_done
+import asyncio
+import time
+import datetime
 
-    def add_callback(self, fn: typing.Callable):
-        self.callbacks.append(fn)
 
-    def mark_done(self, result):
-        self.state = 'done'
-        self.result = result
-        for callback in self.callbacks:
-            callback()
+class YieldToEventLoop:
+    def __await__(self):
+        yield
+
+async def _sleep_watcher(future: asyncio.Future, seconds: float):
+    start_time = time.time()
+    while True:
+        time_elapsed = time.time() - start_time
+        if  time_elapsed > seconds:
+            # This marks the future as done.
+            future.set_result(None)
+            break
+        else:
+            # This is basically the same as asyncio.sleep(0), but I prefer the clarity
+            # this approach provides. Not to mention it's kind of cheating to use asyncio.sleep
+            # when implementing an equivalent!
+            await YieldToEventLoop()
+
+async def async_sleep(seconds: float):
+    future = asyncio.Future()
+    # Add the watcher-task to the event-loop.
+    watcher_task = asyncio.Task(_sleep_watcher(future, seconds))
+    await future
+
+async def other_work():
+    print(f"I am worker. Work work.")
+    time.sleep(0.1)
+
+async def main():
+    # Add a variety of other tasks to the event-loop, so there's something to do while
+    # asynchronously sleeping.
+    asyncio.Task(other_work()), asyncio.Task(other_work()), asyncio.Task(other_work())
+
+    print(f"Starting main() at time: {datetime.datetime.now().strftime("%H:%M:%S")}.")
+    await asyncio.Task(async_sleep(3))
+    print(f"Done main() at time: {datetime.datetime.now().strftime("%H:%M:%S")}.")
+
+asyncio.run(main())
 ```
 
 ## `await`-ing Tasks, Futures & coroutines
@@ -101,7 +130,7 @@ Futures have an important method: `__await__`. Here is the actual, entire implem
 11         return self.result()
 ```
 
-Task is a subclass of Future meaning it inherits its attributes & methods. Task does not override Futures `__await__` implementation. `await`-ing a Task or Future invokes that above `__await__` method and percolates the `yield` on line 7 above to relinquish control to its caller, which is generally the event-loop.
+Task does not override Futures `__await__` implementation. `await`-ing a Task or Future invokes that above `__await__` method and percolates the `yield` on line 7 above to relinquish control to its caller, which is generally the event-loop.
 
 The control flow example next will examine in detail how control flow and values are passed through an example asyncio program, the event-loop, `Future.__await__` and `Task.step`. 
 
