@@ -112,6 +112,16 @@ async def main():
 asyncio.run(main())
 ```
 
+Here is the output:
+```bash
+ $ python hypotheses/7-custom-async-sleep.py
+Starting main() at time: 12:13:03.
+I am worker. Work work.
+I am worker. Work work.
+I am worker. Work work.
+Done main() at time: 12:13:06.
+```
+
 ## `await`-ing Tasks, Futures & coroutines
 
 Futures have an important method: `__await__`. Here is the actual, entire implementation found in `asyncio.futures.Future`. It's okay if it doesn't make complete sense now, we'll go through it in detail in the control-flow example.
