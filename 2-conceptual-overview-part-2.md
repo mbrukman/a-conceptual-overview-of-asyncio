@@ -139,7 +139,7 @@ Futures have an important method: `__await__`. Here is the actual, entire implem
 11         return self.result()
 ```
 
-Task does not override Futures `__await__` implementation. `await`-ing a Task or Future invokes that above `__await__` method and percolates the `yield` on line 7 above to relinquish control to its caller, which is generally the event-loop.
+Task does not override Futures `__await__` implementation. `await`-ing a Task or Future invokes that above `__await__` method and percolates the `yield` on line 6 above to relinquish control to its caller, which is generally the event-loop.
 
 The control flow example next will examine in detail how control flow and values are passed through an example asyncio program, the event-loop, `Future.__await__` and `Task.step`. 
 
