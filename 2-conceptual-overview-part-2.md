@@ -58,13 +58,11 @@ The only way to yield (or effectively cede control) from a coroutine is to `awai
 
 A future is an object meant to represent a computation or process's status and result (if any), hence the term future i.e. still to come or not yet happened. 
 
-A future has a few important attributes. One is its' state which can be either 'pending', 'cancelled' or 'done'. Another is its' result which is set when the state transitions to 'done'. To be clear, a Future does not represent the actual computation to be done, like a coroutine does, instead it represents the status and result of that computation, kind of like a status-light (red, yellow or green) or indicator. 
+A future has a few important attributes. One is its state which can be either 'pending', 'cancelled' or 'done'. Another is its result which is set when the state transitions to 'done'. To be clear, a Future does not represent the actual computation to be done, like a coroutine does, instead it represents the status and result of that computation, kind of like a status-light (red, yellow or green) or indicator. 
 
-Task subclasses Future in order to gain these various features. I said in the prior section tasks store a list of callbacks and I lied. It's actually the Future class that implements this logic. That is, a future stores callbacks or functions it should call once its' state becomes 'done'.
+Task subclasses Future in order to gain these various capabilities. I said in the prior section tasks store a list of callbacks and I lied. It's actually the Future class that implements this logic. That is, a future stores callbacks or functions it should call once its state becomes 'done'.
 
-Futures may be also used directly i.e. not via tasks. Tasks mark themselves as done when their coroutine's complete. Futures are much more versatile and will be marked as done when you say so. In this way, they're the flexible interface for you to make your own conditions for waiting.
-
-Here's how you could leverage Future to create your own variant of asynchronous sleep (i.e. asyncio.sleep).
+Futures may be also used directly i.e. not via tasks. Tasks mark themselves as done when their coroutine's complete. Futures are much more versatile and will be marked as done when you say so. In this way, they're the flexible interface for you to make your own conditions for waiting. Here's how you could leverage Future to create your own variant of asynchronous sleep (i.e. asyncio.sleep).
 
 ```python
 import asyncio
@@ -139,7 +137,7 @@ Futures have an important method: `__await__`. Here is the actual, entire implem
 11         return self.result()
 ```
 
-Task does not override Futures `__await__` implementation. `await`-ing a Task or Future invokes that above `__await__` method and percolates the `yield` on line 6 above to relinquish control to its caller, which is generally the event-loop.
+Task does not override Futures `__await__` implementation. await-ing a Task or Future invokes that above `__await__` method and percolates the yield on line 6 above to relinquish control to its caller, which is generally the event-loop.
 
 The control flow example next will examine in detail how control flow and values are passed through an example asyncio program, the event-loop, `Future.__await__` and `Task.step`. 
 
