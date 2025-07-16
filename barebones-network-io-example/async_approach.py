@@ -64,7 +64,7 @@ async def server_request() -> float:
 async def main():
     task1 = asyncio.Task(uniform_sum(n_samples=int(1.2e8), time_allotment=1.0))
     task2 = asyncio.Task(server_request())
-    await asyncio.gather(task1, task2)
+    await task1, task2
     
 
 if __name__ == "__main__":

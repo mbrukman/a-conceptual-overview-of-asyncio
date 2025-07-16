@@ -23,7 +23,7 @@ There are some other benefits associated with using asyncio. One is clearer visi
 
 ## Opinions and suggestions on certain design choices
 
-Frankly, I'm somewhat confused by a few of the design decisions in asyncio. If you do know or see a reason I'm missing for why they're beneficial, please let me know! I see two possible changes that could simplify people's experience working with asyncio. I feel much more strongly about the first one than the second.
+I'm somewhat confused by a few of the design decisions in asyncio. If you do know or see a reason I'm missing for why they're beneficial, please let me know! I see two possible changes that could simplify people's experience working with asyncio. I feel much more strongly about the first one than the second.
 
 ### 1. await coroutine should be disallowed or should yield to the event-loop
 
