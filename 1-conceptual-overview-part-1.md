@@ -61,14 +61,14 @@ Roughly speaking, tasks are coroutines tied to an event-loop. A task also mainta
 
 ```python
 # This creates a Task object.
-super_special_task = asyncio.Task(coro=super_special_func(x=5), loop=event_loop)
+super_special_task = asyncio.Task(coro=special_fella(magic_number=5), loop=event_loop)
 ```
 
 It's common to see a task instantiated without explicitly specifying the event-loop it belongs to. Since there's only one event-loop (a global singleton), asyncio made the loop argument optional and will add it for you if it's left unspecified.
 ```python
 # The task is implicitly tied to the event-loop by asyncio since the loop 
 # argument was left unspecified.
-another_super_special_task = asyncio.Task(coro=super_special_func(x=12))
+another_super_special_task = asyncio.Task(coro=special_fella(magic_number=12))
 ```
 
 After those two statements are executed, the event-loop should have two corresponding tasks in its queue.
