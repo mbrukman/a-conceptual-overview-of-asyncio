@@ -100,7 +100,7 @@ And, in much more detail:
 1. Control is now in **`program.triple`**
     * Control goes to the coroutine `triple` on line 2. It computes 3 times 5, then finishes and raises a StopIteration exception.
 1. Control is now in **`triple_task.step`**
-    * The StopIteration exception is caught so we go to line 7. The return value of the coroutine `main` is embedded in the `value` attribute of that exception. That result is saved to `triple_task` and `triple_task` is marked as done (via set_result). The done-callbacks of `triple_task` i.e. (`main_task.step`) are also added to the event-loops' queue. The `step` method ends and returns control to the event-loop.
+    * The StopIteration exception is caught so we go to line 7. The return value of the coroutine `main` is embedded in the `value` attribute of that exception. Future.set_result() saves the result, marks the task as done and adds the done-callbacks of `triple_task` to the event-loops' queue. The `step` method ends and returns control to the event-loop.
 1. Control is now in the **`event-loop`**
     * The event-loop cycles to the next task in its queue. The event-loop pops `main_task` and resumes it by calling `main_task.step()`.
 1. Control is now in **`main_task.step`**
