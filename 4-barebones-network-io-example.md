@@ -210,3 +210,5 @@ if __name__ == "__main__":
         print(f"Done. Closing connection: {conn}.\n")
         conn.close()
 ```
+
+### [Next: When to use asyncio & closing thoughts](https://github.com/anordin95/a-conceptual-overview-of-asyncio/blob/main/5-conclusions.md)
