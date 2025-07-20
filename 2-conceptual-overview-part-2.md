@@ -69,14 +69,13 @@ import asyncio
 import time
 import datetime
 
-
 class YieldToEventLoop:
     def __await__(self):
         yield
 
 async def _sleep_watcher(future: asyncio.Future, time_to_wake: float):
     while True:
-        if  time.time() >= time_to_wake:
+        if time.time() >= time_to_wake:
             # This marks the future as done.
             future.set_result(None)
             break
@@ -101,9 +100,9 @@ async def main():
     # asynchronously sleeping.
     asyncio.Task(other_work()), asyncio.Task(other_work()), asyncio.Task(other_work())
 
-    print(f"Starting main() at time: {datetime.datetime.now().strftime("%H:%M:%S")}.")
+    print(f"Beginning asynchronous sleep at time: {datetime.datetime.now().strftime("%H:%M:%S")}.")
     await asyncio.Task(async_sleep(3))
-    print(f"Done main() at time: {datetime.datetime.now().strftime("%H:%M:%S")}.")
+    print(f"Done asynchronous sleep at time: {datetime.datetime.now().strftime("%H:%M:%S")}.")
 
 asyncio.run(main())
 ```
@@ -111,11 +110,11 @@ asyncio.run(main())
 Here is that program's output:
 ```bash
  $ python hypotheses/7-custom-async-sleep.py
-Starting main() at time: 12:13:03.
+Beginning asynchronous sleep at time: 14:52:22.
 I am worker. Work work.
 I am worker. Work work.
 I am worker. Work work.
-Done main() at time: 12:13:06.
+Done asynchronous sleep at time: 14:52:25.
 ```
 
 ## `await`-ing Tasks & Futures

@@ -9,7 +9,7 @@ class YieldToEventLoop:
 
 async def _sleep_watcher(future: asyncio.Future, time_to_wake: float):
     while True:
-        if  time.time() >= time_to_wake:
+        if time.time() >= time_to_wake:
             # This marks the future as done.
             future.set_result(None)
             break
@@ -34,8 +34,8 @@ async def main():
     # asynchronously sleeping.
     asyncio.Task(other_work()), asyncio.Task(other_work()), asyncio.Task(other_work())
 
-    print(f"Starting main() at time: {datetime.datetime.now().strftime("%H:%M:%S")}.")
+    print(f"Beginning asynchronous sleep at time: {datetime.datetime.now().strftime("%H:%M:%S")}.")
     await asyncio.Task(async_sleep(3))
-    print(f"Done main() at time: {datetime.datetime.now().strftime("%H:%M:%S")}.")
+    print(f"Done asynchronous sleep at time: {datetime.datetime.now().strftime("%H:%M:%S")}.")
 
 asyncio.run(main())
