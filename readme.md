@@ -2,7 +2,7 @@
 
 ## Motivation
 
-I've used Python's asyncio a couple times now, but never really felt confident in my mental model of how it works nor how I should use it. The official docs provide decent documentation for each specific function in the package, but, in my opinion, lack a cohesive overview of the systems design and architecture. Something that could help the user understand the why and how behind the recommended patterns. And a way to help the user make informed decisions about which tool in the asyncio toolkit they ought to grab, or to recognize when asyncio is the entirely wrong toolkit. This is my attempt to fill that gap.
+I've used Python's asyncio a couple times now, but never really felt confident in my mental model of how it fundamentally works and therefore how I can best leverage it. The official docs provide decent documentation for each specific function in the package, but, in my opinion, lack a cohesive overview of the systems design and architecture. Something that could help the user understand the why and how behind the recommended patterns. And a way to help the user make informed decisions about which tool in the asyncio toolkit they ought to grab, or to recognize when asyncio is the entirely wrong toolkit. This is my attempt to fill that gap.
 
 There were some articles I found online that were illuminating with certain aspects, but didn't totally cover what I was after. They're linked at the end of the final section.
 
