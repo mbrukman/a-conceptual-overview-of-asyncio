@@ -28,7 +28,6 @@ async def async_sleep(seconds: float):
 
 async def other_work():
     print(f"I am worker. Work work.")
-    time.sleep(0.1)
 
 async def main():
     # Add a variety of other tasks to the event-loop, so there's something to do while
