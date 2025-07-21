@@ -9,17 +9,17 @@ import datetime
 
 
 async def factorial(n: int):
-    print(f"Beginning factorial(n={n:,}) at time: {datetime.datetime.now().strftime("%H:%M:%S")}.")
+    print(f"Beginning factorial(n={n:,}) at time: {datetime.datetime.now().strftime('%H:%M:%S')}.")
     total = 1
     for val in range(1, n+1):
         total *= val
-    print(f"Done factorial(n={n:,}) at time: {datetime.datetime.now().strftime("%H:%M:%S")}.\n")
+    print(f"Done factorial(n={n:,}) at time: {datetime.datetime.now().strftime('%H:%M:%S')}.\n")
     return total
 
 async def simple_print():
     print(
         "============================================\n"
-        f"Hi, I am simple_print() coming to you live at: {datetime.datetime.now().strftime("%H:%M:%S")}. "
+        f"Hi, I am simple_print() coming to you live at: {datetime.datetime.now().strftime('%H:%M:%S')}. "
         "I am but a lowly, simple printer, though I have all I need in life"
         " -- fresh paper & a loving octopus-wife."
         "\n============================================"

@@ -34,8 +34,8 @@ async def main():
     # asynchronously sleeping.
     asyncio.Task(other_work()), asyncio.Task(other_work()), asyncio.Task(other_work())
 
-    print(f"Beginning asynchronous sleep at time: {datetime.datetime.now().strftime("%H:%M:%S")}.")
+    print(f"Beginning asynchronous sleep at time: {datetime.datetime.now().strftime('%H:%M:%S')}.")
     await asyncio.Task(async_sleep(3))
-    print(f"Done asynchronous sleep at time: {datetime.datetime.now().strftime("%H:%M:%S")}.")
+    print(f"Done asynchronous sleep at time: {datetime.datetime.now().strftime('%H:%M:%S')}.")
 
 asyncio.run(main())

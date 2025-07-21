@@ -10,7 +10,7 @@ import time
 import datetime
 
 def print_msg(msg: str):
-    print(f"Executing print_msg() at time: {datetime.datetime.now().strftime("%H:%M:%S")}. Message is: {msg}.")
+    print(f"Executing print_msg() at time: {datetime.datetime.now().strftime('%H:%M:%S')}. Message is: {msg}.")
 
 async def main():
     
@@ -18,7 +18,7 @@ async def main():
     delay = 2
     loop.call_later(delay, print_msg, "I am call-later!")
     loop.call_at(loop.time() + delay, print_msg, "It is I, call-at!")
-    print(f"Requested call-later & call-at at: {datetime.datetime.now().strftime("%H:%M:%S")} with a delay of: {delay} seconds.\n")
+    print(f"Requested call-later & call-at at: {datetime.datetime.now().strftime('%H:%M:%S')} with a delay of: {delay} seconds.\n")
 
     time.sleep(10)
 
