@@ -30,7 +30,7 @@ def hello_printer():
 Calling a regular function invokes its logic or body. 
 ```python
 >>> hello_printer()
-Hi, I am simple_print(), a lowly, simple printer, though I have all I need in life -- fresh paper & a loving octopus-wife.
+Hi, I am a lowly, simple printer, though I have all I need in life -- fresh paper & a loving octopus-wife.
 >>>
 ```
 
