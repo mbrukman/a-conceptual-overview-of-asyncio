@@ -1,4 +1,4 @@
-# Conceputal Overview Part 1: A Mental Model
+# Conceptual Overview Part 1: A Mental Model
 
 ## Event Loop
 
@@ -18,7 +18,7 @@ event_loop.run_forever()
 
 ## Asynchronous Functions & Coroutines
 
-This is a regular 'ol Python function.
+This is a regular ol' Python function.
 ```python
 def hello_printer():
     print(
